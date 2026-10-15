@@ -1,0 +1,11 @@
+name: patastay_workspace
+description: PataStay monorepo workspace (mobile app, admin web app, shared core).
+publish_to: none
+
+environment:
+  sdk: ^3.13.5
+
+workspace:
+  - apps/mobile
+  - apps/admin
+  - packages/patastay_core

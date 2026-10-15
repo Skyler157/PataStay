@@ -1,0 +1,26 @@
+# Environment / secrets — never commit real keys
+env/*.json
+!env/example.json
+.env
+.env.*
+supabase/.env
+supabase/.temp/
+supabase/.branches/
+
+# Flutter / Dart
+.dart_tool/
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
+*.iml
+.idea/
+**/android/key.properties
+**/android/app/*.jks
+**/android/app/*.keystore
+**/android/local.properties
+**/ios/Flutter/Generated.xcconfig
+**/ios/Pods/
+
+# OS / editor
+.DS_Store
+Thumbs.db
