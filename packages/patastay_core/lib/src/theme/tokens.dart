@@ -2,15 +2,16 @@ import 'package:flutter/material.dart';
 
 /// PataStay brand palette.
 ///
-/// Acacia green (primary) signals trust and calm; clay (accent) is a warm,
-/// local earth tone used sparingly for emphasis; sand is the page background.
-/// Verified uses a distinct blue so the badge never blends into brand green.
+/// Lake blue (primary) signals trust and calm without echoing mobile-money
+/// green; clay (accent) is a warm, local earth tone used sparingly; sand is the
+/// page background. Verified uses a distinct teal so the badge never blends
+/// into the brand colour.
 /// All text/background pairs meet WCAG AA (4.5:1) contrast.
 abstract final class PataColors {
-  static const acacia = Color(0xFF0B5D4B);
-  static const acaciaDeep = Color(0xFF074336);
-  static const acaciaContainer = Color(0xFFD4EEE5);
-  static const acaciaLight = Color(0xFF63D1AF);
+  static const lake = Color(0xFF1E4FA3);
+  static const lakeDeep = Color(0xFF12326D);
+  static const lakeContainer = Color(0xFFDCE6FA);
+  static const lakeLight = Color(0xFF9DB8FF);
 
   static const clay = Color(0xFFB9502A);
   static const clayContainer = Color(0xFFFBE4DA);
@@ -23,10 +24,10 @@ abstract final class PataColors {
   static const inkMuted = Color(0xFF5E5950);
   static const line = Color(0xFFE2DDD4);
 
-  static const night = Color(0xFF111413);
-  static const nightSurface = Color(0xFF1A1E1C);
-  static const nightSurfaceHigh = Color(0xFF242927);
-  static const nightLine = Color(0xFF353B38);
+  static const night = Color(0xFF111318);
+  static const nightSurface = Color(0xFF191C22);
+  static const nightSurfaceHigh = Color(0xFF23272F);
+  static const nightLine = Color(0xFF343A45);
   static const mist = Color(0xFFEDEAE4);
   static const mistMuted = Color(0xFFB3AEA5);
 }
@@ -87,8 +88,8 @@ class PataPalette extends ThemeExtension<PataPalette> {
   final Color price;
 
   static const light = PataPalette(
-    verified: Color(0xFF1C5BC7),
-    verifiedContainer: Color(0xFFDDE8FB),
+    verified: Color(0xFF0B7A6B),
+    verifiedContainer: Color(0xFFD3F1EC),
     success: Color(0xFF14713A),
     successContainer: Color(0xFFDCF2E3),
     warning: Color(0xFF8A5A00),
@@ -101,8 +102,8 @@ class PataPalette extends ThemeExtension<PataPalette> {
   );
 
   static const dark = PataPalette(
-    verified: Color(0xFF8DB4FF),
-    verifiedContainer: Color(0xFF1C2B47),
+    verified: Color(0xFF5DD8C4),
+    verifiedContainer: Color(0xFF12352F),
     success: Color(0xFF7FD6A0),
     successContainer: Color(0xFF173323),
     warning: Color(0xFFF2C46B),

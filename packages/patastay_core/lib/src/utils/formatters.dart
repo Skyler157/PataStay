@@ -20,8 +20,8 @@ abstract final class Money {
 }
 
 abstract final class Dates {
-  static final _day = DateFormat('d MMM yyyy', 'en');
-  static final _shortDay = DateFormat('EEE d MMM', 'en');
+  static final _day = DateFormat('d MMM yyyy', 'en_US');
+  static final _shortDay = DateFormat('EEE d MMM', 'en_US');
 
   static String day(DateTime date) => _day.format(date.toLocal());
   static String shortDay(DateTime date) => _shortDay.format(date.toLocal());

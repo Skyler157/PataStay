@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:patastay_core/patastay_core.dart';
 
 import '../../../core/routing/routes.dart';
+import '../../../core/storage/local_preferences.dart';
 import '../../../core/widgets/form_widgets.dart';
 
 class ProfileScreen extends ConsumerWidget {
@@ -15,7 +16,16 @@ class ProfileScreen extends ConsumerWidget {
     final profile = ref.watch(currentProfileProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Profile')),
+      appBar: AppBar(
+        title: const Text('Profile'),
+        actions: [
+          IconButton(
+            tooltip: 'Appearance',
+            icon: const Icon(Icons.contrast_rounded),
+            onPressed: () => showAppearanceSheet(context),
+          ),
+        ],
+      ),
       body: !signedIn
           ? const _SignedOutView()
           : switch (profile) {
@@ -161,6 +171,13 @@ class _ProfileView extends ConsumerWidget {
             onTap: () => context.push(Routes.updatePassword),
           ),
           ListTile(
+            leading: const Icon(Icons.contrast_rounded),
+            title: const Text('Appearance'),
+            subtitle: Text(_themeLabel(ref.watch(themeModeProvider))),
+            trailing: const Icon(Icons.chevron_right_rounded),
+            onTap: () => showAppearanceSheet(context),
+          ),
+          ListTile(
             leading: const Icon(Icons.logout_rounded),
             title: const Text('Sign out'),
             onTap: () => _signOut(context, ref),
@@ -193,4 +210,52 @@ class _RoleTag extends StatelessWidget {
       child: Text(role.label, style: context.text.labelMedium),
     );
   }
+}
+
+String _themeLabel(ThemeMode mode) => switch (mode) {
+      ThemeMode.system => 'Same as phone',
+      ThemeMode.light => 'Light',
+      ThemeMode.dark => 'Dark',
+    };
+
+Future<void> showAppearanceSheet(BuildContext context) {
+  return showModalBottomSheet<void>(
+    context: context,
+    builder: (_) => Consumer(
+      builder: (context, ref, _) {
+        final current = ref.watch(themeModeProvider);
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(Space.gutter, 0, Space.gutter, Space.sm),
+                child: Text('Appearance', style: context.text.titleLarge),
+              ),
+              RadioGroup<ThemeMode>(
+                groupValue: current,
+                onChanged: (mode) {
+                  if (mode != null) ref.read(themeModeProvider.notifier).set(mode);
+                },
+                child: Column(children: [
+                  for (final (mode, icon) in [
+                    (ThemeMode.system, Icons.phone_android_rounded),
+                    (ThemeMode.light, Icons.light_mode_outlined),
+                    (ThemeMode.dark, Icons.dark_mode_outlined),
+                  ])
+                    RadioListTile<ThemeMode>(
+                      value: mode,
+                      title: Text(_themeLabel(mode)),
+                      secondary: Icon(icon),
+                    ),
+                ]),
+              ),
+              Gap.md,
+            ],
+          ),
+        );
+      },
+    ),
+  );
 }

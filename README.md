@@ -65,6 +65,19 @@ copy env\example.json env\dev.json
 
 > Only use the **publishable** (anon) key in `env/*.json`. The app refuses to start if you give it a secret or service-role key.
 
+## Maps and "Near me"
+
+Maps use **OpenStreetMap** through `flutter_map`. They are free, with no API key and no card. Each listing shows an approximate ~350 m area; the exact pin is private (see docs/SECURITY.md). "Near me" uses the phone's GPS through `geolocator`, which is also free.
+
+OpenStreetMap's public tile server is fine for development and early testing, but its usage policy does not allow heavy app traffic. Before a public launch, point the app at a hosted tile provider by adding these to `env/prod.json`:
+
+```json
+"MAP_TILE_URL": "https://api.maptiler.com/maps/streets-v2/256/{z}/{x}/{y}.png?key=YOUR_KEY",
+"MAP_ATTRIBUTION": "MapTiler, OpenStreetMap contributors"
+```
+
+MapTiler, Stadia Maps and Mapbox all offer free or low-cost tiers. No code changes are needed.
+
 ## Running
 
 ```powershell
@@ -81,11 +94,11 @@ flutter run --dart-define-from-file=../../env/dev.json
 **Reaching the local backend from a phone.** `127.0.0.1` points at the phone itself, not your PC.
 - Android emulator: set `SUPABASE_URL` to `http://10.0.2.2:54321`.
 - Physical phone on the same Wi-Fi: use your PC's LAN IP (run `ipconfig`), for example `http://192.168.1.20:54321`, and allow port 54321 through Windows Firewall.
-- Physical phone over USB: run `adb reverse tcp:54321 tcp:54321` and keep `http://127.0.0.1:54321`.
+- Physical phone over USB: run `adb reverse tcp:54321 tcp:54321` and keep `http://127.0.0.1:54321`. The link drops whenever the USB connection blips; `tools/keep-phone-linked.ps1` re-creates it automatically.
 
 ### Local accounts (seed data)
 
-Every account uses the password `PataStay#Dev2026`.
+Every account uses the password `PataStay#Dev2026`. `supabase db reset` deletes any other accounts you created locally.
 
 | Email | Role |
 |---|---|
@@ -147,8 +160,8 @@ Android release signing requires `apps/mobile/android/key.properties` and a keys
 | Phase | Status |
 |---|---|
 | 1. Foundation: schema, RLS, auth, profiles, routing, theme, admin sign-in and stats | Done |
-| 2. Guest marketplace: search, details, favourites, enquiries, contact | Next |
-| 3. Host tools: listing wizard, photos, enquiries, statistics | Planned |
+| 2. Guest marketplace: home, search and filters, details, favourites, enquiries, WhatsApp/call contact, reports | Done |
+| 3. Host tools: listing wizard, photos, enquiries, statistics | Next |
 | 4. Administration: review queue, verification, reports, users, exports | Planned |
 | 5. Quality and launch | Planned |
 

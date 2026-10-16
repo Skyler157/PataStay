@@ -29,12 +29,17 @@ enum PropertyType {
   bedsitter('bedsitter', 'Bedsitter'),
   oneBedroom('one_bedroom', '1-bedroom'),
   twoBedroom('two_bedroom', '2-bedroom'),
-  threeBedroomPlus('three_bedroom_plus', '3+ bedroom'),
+  threeBedroomPlus('three_bedroom_plus', '3-bedroom'),
+  penthouse('penthouse', 'Penthouse'),
+  villa('villa', 'Villa'),
   furnishedApartment('furnished_apartment', 'Furnished apartment'),
   servicedApartment('serviced_apartment', 'Serviced apartment'),
   guestHouse('guest_house', 'Guest house'),
   privateRoom('private_room', 'Private room'),
-  house('house', 'Entire house');
+  house('house', 'Private house');
+
+  /// The types shown as shortcuts on Home ("Browse by type").
+  static const featured = [studio, oneBedroom, twoBedroom, threeBedroomPlus, penthouse, villa, house];
 
   const PropertyType(this.dbValue, this.label);
   final String dbValue;

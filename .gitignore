@@ -20,7 +20,11 @@ build/
 **/android/local.properties
 **/ios/Flutter/Generated.xcconfig
 **/ios/Pods/
+**/ios/Flutter/Secrets.xcconfig
 
 # OS / editor
 .DS_Store
 Thumbs.db
+
+# Local test photos (not committed)
+sample-photos/

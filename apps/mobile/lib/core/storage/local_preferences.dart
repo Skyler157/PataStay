@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -6,6 +7,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 abstract interface class LocalPreferences {
   bool get onboardingSeen;
   Future<void> setOnboardingSeen();
+
+  /// 'system', 'light' or 'dark'.
+  String get themeMode;
+  Future<void> setThemeMode(String mode);
+
+  /// When the guest last opened their enquiries (drives the "new reply" badge).
+  DateTime? get enquiriesSeenAt;
+  Future<void> setEnquiriesSeenAt(DateTime time);
 }
 
 class SharedLocalPreferences implements LocalPreferences {
@@ -14,13 +23,30 @@ class SharedLocalPreferences implements LocalPreferences {
   final SharedPreferencesWithCache _prefs;
 
   static const _onboardingSeen = 'onboarding_seen_v1';
-  static const keys = {_onboardingSeen};
+  static const _themeMode = 'theme_mode';
+  static const _enquiriesSeenAt = 'enquiries_seen_at';
+  static const keys = {_onboardingSeen, _themeMode, _enquiriesSeenAt};
 
   @override
   bool get onboardingSeen => _prefs.getBool(_onboardingSeen) ?? false;
 
   @override
   Future<void> setOnboardingSeen() => _prefs.setBool(_onboardingSeen, true);
+
+  @override
+  String get themeMode => _prefs.getString(_themeMode) ?? 'system';
+
+  @override
+  Future<void> setThemeMode(String mode) => _prefs.setString(_themeMode, mode);
+
+  @override
+  DateTime? get enquiriesSeenAt {
+    final raw = _prefs.getString(_enquiriesSeenAt);
+    return raw == null ? null : DateTime.tryParse(raw);
+  }
+
+  @override
+  Future<void> setEnquiriesSeenAt(DateTime time) => _prefs.setString(_enquiriesSeenAt, time.toUtc().toIso8601String());
 }
 
 final localPreferencesProvider = Provider<LocalPreferences>(
@@ -38,3 +64,19 @@ class OnboardingController extends Notifier<bool> {
 }
 
 final onboardingCompleteProvider = NotifierProvider<OnboardingController, bool>(OnboardingController.new);
+
+/// Light, dark, or follow the phone. Saved on the device.
+class ThemeModeController extends Notifier<ThemeMode> {
+  @override
+  ThemeMode build() => ThemeMode.values.firstWhere(
+        (m) => m.name == ref.watch(localPreferencesProvider).themeMode,
+        orElse: () => ThemeMode.system,
+      );
+
+  Future<void> set(ThemeMode mode) async {
+    state = mode;
+    await ref.read(localPreferencesProvider).setThemeMode(mode.name);
+  }
+}
+
+final themeModeProvider = NotifierProvider<ThemeModeController, ThemeMode>(ThemeModeController.new);

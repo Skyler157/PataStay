@@ -31,7 +31,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
     setState(() => _busy = true);
     try {
       await ref.read(authRepositoryProvider).signIn(email: _email.text, password: _password.text);
-      // The router redirects away from this screen once signed in.
+      if (mounted) context.go(Routes.afterSignIn(GoRouterState.of(context).uri.queryParameters['from']));
     } on AppFailure catch (failure) {
       if (mounted) context.showFailure(failure);
     } finally {

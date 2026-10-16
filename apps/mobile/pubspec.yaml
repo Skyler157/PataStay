@@ -16,6 +16,13 @@ dependencies:
   go_router: ^18.0.2
   shared_preferences: ^2.5.6
   supabase_flutter: ^2.18.3
+  cached_network_image: ^4.0.4
+  url_launcher: ^6.3.3
+  intl: ^0.20.3
+  geolocator: ^14.1.1
+  flutter_map: ^8.3.2
+  latlong2: ^0.10.1
+  connectivity_plus: ^7.3.1
 
 dev_dependencies:
   flutter_test:
@@ -24,6 +31,8 @@ dev_dependencies:
   mocktail: ^1.0.5
   integration_test:
     sdk: flutter
+  flutter_launcher_icons: ^0.14.4
+  flutter_native_splash: ^2.4.8
 
 flutter:
   uses-material-design: true
