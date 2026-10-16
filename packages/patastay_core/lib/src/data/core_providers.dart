@@ -5,7 +5,9 @@ import '../config/app_config.dart';
 import '../models/profile.dart';
 import '../models/reference_data.dart';
 import 'auth_repository.dart';
+import 'guest_repositories.dart';
 import 'profile_repository.dart';
+import 'property_repository.dart';
 import 'reference_data_repository.dart';
 
 /// Overridden in each app's bootstrap with the validated configuration.
@@ -50,4 +52,20 @@ final neighbourhoodsProvider = FutureProvider<List<Neighbourhood>>(
 
 final amenitiesProvider = FutureProvider<List<Amenity>>(
   (ref) => ref.watch(referenceDataRepositoryProvider).fetchAmenities(),
+);
+
+final propertyRepositoryProvider = Provider<PropertyRepository>(
+  (ref) => PropertyRepository(ref.watch(supabaseClientProvider)),
+);
+
+final favouritesRepositoryProvider = Provider<FavouritesRepository>(
+  (ref) => FavouritesRepository(ref.watch(supabaseClientProvider)),
+);
+
+final enquiryRepositoryProvider = Provider<EnquiryRepository>(
+  (ref) => EnquiryRepository(ref.watch(supabaseClientProvider)),
+);
+
+final reportRepositoryProvider = Provider<ReportRepository>(
+  (ref) => ReportRepository(ref.watch(supabaseClientProvider)),
 );

@@ -8,10 +8,16 @@ import '../../features/auth/presentation/forgot_password_screen.dart';
 import '../../features/auth/presentation/register_screen.dart';
 import '../../features/auth/presentation/sign_in_screen.dart';
 import '../../features/auth/presentation/update_password_screen.dart';
-import '../../features/home/presentation/explore_screen.dart';
+import '../../features/enquiries/presentation/enquiry_details_screen.dart';
+import '../../features/enquiries/presentation/enquiry_form_screen.dart';
+import '../../features/enquiries/presentation/my_enquiries_screen.dart';
+import '../../features/favourites/presentation/saved_screen.dart';
+import '../../features/home/presentation/home_screen.dart';
 import '../../features/onboarding/presentation/onboarding_screen.dart';
 import '../../features/profile/presentation/edit_profile_screen.dart';
 import '../../features/profile/presentation/profile_screen.dart';
+import '../../features/properties/presentation/property_details_screen.dart';
+import '../../features/properties/presentation/search_screen.dart';
 import '../../features/shell/app_shell.dart';
 import '../storage/local_preferences.dart';
 import 'routes.dart';
@@ -47,11 +53,41 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: Routes.register, builder: (_, _) => const RegisterScreen()),
       GoRoute(path: Routes.forgotPassword, builder: (_, _) => const ForgotPasswordScreen()),
       GoRoute(path: Routes.updatePassword, builder: (_, _) => const UpdatePasswordScreen()),
+      GoRoute(
+        path: '/property/:id',
+        builder: (_, state) => PropertyDetailsScreen(propertyId: state.pathParameters['id']!),
+        routes: [
+          GoRoute(
+            path: 'enquire',
+            builder: (_, state) => EnquiryFormScreen(propertyId: state.pathParameters['id']!),
+          ),
+        ],
+      ),
+      GoRoute(
+        path: Routes.enquirySent,
+        builder: (_, state) => EnquirySentScreen(enquiry: state.extra is Enquiry ? state.extra! as Enquiry : null),
+      ),
       StatefulShellRoute.indexedStack(
         builder: (_, _, shell) => AppShell(shell: shell),
         branches: [
           StatefulShellBranch(routes: [
-            GoRoute(path: Routes.explore, builder: (_, _) => const ExploreScreen()),
+            GoRoute(
+              path: Routes.explore,
+              builder: (_, _) => const HomeScreen(),
+              routes: [GoRoute(path: 'search', builder: (_, _) => const SearchScreen())],
+            ),
+          ]),
+          StatefulShellBranch(routes: [
+            GoRoute(path: Routes.saved, builder: (_, _) => const SavedScreen()),
+          ]),
+          StatefulShellBranch(routes: [
+            GoRoute(
+              path: Routes.enquiries,
+              builder: (_, _) => const MyEnquiriesScreen(),
+              routes: [
+                GoRoute(path: ':id', builder: (_, state) => EnquiryDetailsScreen(enquiryId: state.pathParameters['id']!)),
+              ],
+            ),
           ]),
           StatefulShellBranch(routes: [
             GoRoute(

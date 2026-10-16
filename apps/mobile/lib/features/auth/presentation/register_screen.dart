@@ -42,10 +42,12 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             fullName: _name.text,
             wantsToHost: _wantsToHost,
           );
-      if (outcome == SignUpOutcome.confirmationEmailSent && mounted) {
+      if (!mounted) return;
+      if (outcome == SignUpOutcome.confirmationEmailSent) {
         setState(() => _confirmationSentTo = _email.text.trim());
+      } else {
+        context.go(Routes.afterSignIn(GoRouterState.of(context).uri.queryParameters['from']));
       }
-      // When signed in immediately, the router redirects automatically.
     } on AppFailure catch (failure) {
       if (mounted) context.showFailure(failure);
     } finally {

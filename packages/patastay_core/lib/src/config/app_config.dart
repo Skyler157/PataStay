@@ -12,6 +12,9 @@ class AppConfig {
     required this.supabaseUrl,
     required this.supabasePublishableKey,
     this.environment = AppEnvironment.development,
+    this.mapTileUrl = defaultMapTileUrl,
+    this.mapAttribution = defaultMapAttribution,
+    this.showSampleLabels = true,
   });
 
   factory AppConfig.fromEnvironment() {
@@ -23,12 +26,32 @@ class AppConfig {
         (e) => e.name == env,
         orElse: () => AppEnvironment.development,
       ),
+      mapTileUrl: const String.fromEnvironment('MAP_TILE_URL', defaultValue: defaultMapTileUrl).trim(),
+      mapAttribution: const String.fromEnvironment('MAP_ATTRIBUTION', defaultValue: defaultMapAttribution).trim(),
+      showSampleLabels: const String.fromEnvironment('SHOW_SAMPLE_LABELS', defaultValue: 'true') != 'false',
     );
   }
 
   final String supabaseUrl;
   final String supabasePublishableKey;
   final AppEnvironment environment;
+
+  /// Map tiles (free OpenStreetMap by default). Switching to a hosted
+  /// provider later (MapTiler, Stadia, Mapbox...) only changes this URL and
+  /// the attribution; an empty URL hides maps and shows a fallback card.
+  final String mapTileUrl;
+  final String mapAttribution;
+
+  static const defaultMapTileUrl = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
+  static const defaultMapAttribution = 'OpenStreetMap contributors';
+
+  bool get mapsEnabled => mapTileUrl.isNotEmpty;
+
+  /// Presentation mode: when false, development sample listings are shown
+  /// without "Sample listing" labels, to preview the app as it will look
+  /// with real listings. Only affects local test data (is_seed); hosted
+  /// projects never contain seed listings.
+  final bool showSampleLabels;
 
   static const propertyImagesBucket = 'property-images';
 

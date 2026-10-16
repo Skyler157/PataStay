@@ -44,6 +44,14 @@ class ConflictFailure extends AppFailure {
   const ConflictFailure([super.message = 'This already exists.']);
 }
 
+/// The device's location is off, not permitted, or unavailable.
+class LocationFailure extends AppFailure {
+  const LocationFailure(super.message, {this.canOpenSettings = false});
+
+  /// True when the fix is in the phone's settings.
+  final bool canOpenSettings;
+}
+
 class UnexpectedFailure extends AppFailure {
   const UnexpectedFailure([super.message = 'Something went wrong. Please try again.']);
 }

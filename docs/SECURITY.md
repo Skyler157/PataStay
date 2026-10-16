@@ -55,6 +55,10 @@ any except suspended ──archive_property()──▶ archived
 - The verified badge (`admin_set_property_verified`) needs the latest results of these checks to be *pass*: owner identity, ownership/authority, and a site visit or video walkthrough.
 - Every status change is recorded in `property_status_history` with the actor and reason.
 
+## Search
+
+`search_properties()` is `SECURITY INVOKER`, so RLS still limits results to published listings. When dates are given, it also excludes listings with a blocked night in the stay or a minimum stay longer than the trip. Each listing has a public `listing_number` (shown as `PS-1001`) that guests quote to hosts; it reveals nothing private.
+
 ## Enquiries
 
 - `guest_id` and `status` are forced server-side. Clients cannot set them.
@@ -67,8 +71,8 @@ Bucket `property-images`: public read (for CDN caching; object names are random 
 
 ## Tests
 
-`supabase/tests/database/001_access_control.test.sql` (run with `supabase test db`) covers:
-sign-up role escalation, anonymous visibility, profile and contact privacy, contact reveal requiring auth, admin RPC denial, guests editing their own role, guests creating listings, favourite and enquiry isolation, server-side enquiry validation, hosts editing status or verification, hosts editing other hosts' listings, host enquiry isolation, submission completeness, admin approval, and verification prerequisites.
+`supabase/tests/database/001_access_control.test.sql` and `002_marketplace.test.sql` (run with `supabase test db`) cover:
+sign-up role escalation, anonymous visibility, profile and contact privacy, contact reveal requiring auth, admin RPC denial, guests editing their own role, guests creating listings, favourite and enquiry isolation, server-side enquiry validation, hosts editing status or verification, hosts editing other hosts' listings, host enquiry isolation, submission completeness, admin approval, verification prerequisites, and date-aware search (blocked nights, minimum stay, capacity).
 
 When adding a table or RPC, add matching tests before shipping.
 

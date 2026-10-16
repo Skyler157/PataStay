@@ -4,7 +4,12 @@ import '../theme/tokens.dart';
 
 /// Text-based PataStay logo: a roofline "pin" mark plus the wordmark.
 class PataWordmark extends StatelessWidget {
-  const PataWordmark({super.key, this.size = 24, this.showMark = true, this.inverted = false});
+  const PataWordmark({
+    super.key,
+    this.size = 24,
+    this.showMark = true,
+    this.inverted = false,
+  });
 
   final double size;
   final bool showMark;
@@ -28,20 +33,39 @@ class PataWordmark extends StatelessWidget {
     return Semantics(
       label: 'PataStay',
       excludeSemantics: true,
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (showMark) ...[
-            _Mark(size: size * 1.15, color: primary, accent: inverted ? Colors.white : scheme.secondary),
-            SizedBox(width: size * 0.3),
+      // A logo keeps its size when the phone uses large text, and shrinks
+      // rather than overflowing when space is tight.
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        alignment: AlignmentDirectional.centerStart,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (showMark) ...[
+              _Mark(
+                size: size * 1.15,
+                color: primary,
+                accent: inverted ? Colors.white : scheme.secondary,
+              ),
+              SizedBox(width: size * 0.3),
+            ],
+            Text.rich(
+              TextSpan(
+                children: [
+                  TextSpan(
+                    text: 'Pata',
+                    style: style.copyWith(color: ink),
+                  ),
+                  TextSpan(
+                    text: 'Stay',
+                    style: style.copyWith(color: primary),
+                  ),
+                ],
+              ),
+              textScaler: TextScaler.noScaling,
+            ),
           ],
-          Text.rich(
-            TextSpan(children: [
-              TextSpan(text: 'Pata', style: style.copyWith(color: ink)),
-              TextSpan(text: 'Stay', style: style.copyWith(color: primary)),
-            ]),
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -73,7 +97,10 @@ class _MarkPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final s = size.width;
-    final tile = RRect.fromRectAndRadius(Offset.zero & size, Radius.circular(s * 0.28));
+    final tile = RRect.fromRectAndRadius(
+      Offset.zero & size,
+      Radius.circular(s * 0.28),
+    );
     canvas.drawRRect(tile, Paint()..color = color);
 
     final roof = Path()
@@ -90,11 +117,19 @@ class _MarkPainter extends CustomPainter {
       Radius.circular(s * 0.04),
     );
     canvas.drawRRect(door, Paint()..color = color);
-    canvas.drawCircle(Offset(s * 0.76, s * 0.24), s * 0.08, Paint()..color = accent == Colors.white ? Colors.white : const Color(0xFFF0A07E));
+    canvas.drawCircle(
+      Offset(s * 0.76, s * 0.24),
+      s * 0.08,
+      Paint()
+        ..color = accent == Colors.white
+            ? Colors.white
+            : const Color(0xFFF0A07E),
+    );
   }
 
   @override
-  bool shouldRepaint(_MarkPainter oldDelegate) => oldDelegate.color != color || oldDelegate.accent != accent;
+  bool shouldRepaint(_MarkPainter oldDelegate) =>
+      oldDelegate.color != color || oldDelegate.accent != accent;
 }
 
 /// Convenience gap widgets keep layouts on the spacing scale.
