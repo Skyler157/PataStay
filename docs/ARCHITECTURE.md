@@ -40,7 +40,7 @@ Each feature folder separates its concerns:
 
 Defined in `patastay_core/src/theme`, shared by both apps.
 
-- **Colour:** lake blue (`#1E4FA3`) for trust and primary actions. It was chosen over the original acacia green because green in Kenya strongly suggests Safaricom/M-Pesa, which is confusing for an app that never takes payments. Clay (`#B9502A`) is a warm Kenyan accent used sparingly, and a sand background (`#F7F4EF`) lets white cards stand out. Verified uses a distinct teal (`#0B7A6B`) so the badge can never be mistaken for brand decoration. All text pairs meet WCAG AA contrast, and a full dark theme is included.
+- **Colour ("Coast Teal & Saffron"):** deep teal (`#0E6B70`) for primary actions and highlights. It's calm and trustworthy without being another travel-app blue or M-Pesa green. Saffron (`#F6B53D`) is a warm accent used sparingly (the logo sun, Featured badges, area tiles), always as a fill with dark text. Sand (`#F7F4EF`) is the page background. Verified uses the classic trust blue (`#1C5BC7`) so it never blends into the brand colour, and a saved heart is clay. Chosen after comparing palettes inspired by Airbnb, Booking.com and Vrbo (see the PataStay Colour Options page). All text pairs meet WCAG AA, and there is a full dark theme.
 - **Type:** Plus Jakarta Sans (OFL), bundled rather than downloaded at runtime to save mobile data.
 - **Spacing and shape:** a 4-point scale, 12 px control radius, 16 px card radius, and touch targets of at least 48 px.
 - **Components:** state views (loading, empty, error with retry, offline), info banners, a busy button, form fields, property cards, price block (nightly rate plus stay total), verified/sample/freshness badges, a favourite button, and a guest stepper.

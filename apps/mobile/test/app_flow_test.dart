@@ -79,6 +79,8 @@ Widget buildApp({
   AuthRepository? auth,
   Future<List<Property>> Function()? loadRecent,
   bool online = true,
+  Profile? signedInAs,
+  List<Enquiry> enquiries = const [],
 }) {
   final properties = MockPropertyRepository();
   when(() => properties.trackView(any())).thenAnswer((_) async {});
@@ -89,9 +91,9 @@ Widget buildApp({
       ),
       localPreferencesProvider.overrideWithValue(prefs),
       authStateChangesProvider.overrideWith((ref) => const Stream.empty()),
-      currentUserIdProvider.overrideWithValue(null),
-      currentProfileProvider.overrideWith((ref) async => null),
-      myEnquiriesProvider.overrideWith((ref) async => const []),
+      currentUserIdProvider.overrideWithValue(signedInAs?.id),
+      currentProfileProvider.overrideWith((ref) async => signedInAs),
+      myEnquiriesProvider.overrideWith((ref) async => enquiries),
       isOnlineProvider.overrideWith((ref) => Stream.value(online)),
       neighbourhoodsProvider.overrideWith((ref) async => _neighbourhoods),
       amenitiesProvider.overrideWith((ref) async => const []),
@@ -247,6 +249,48 @@ void main() {
     await tester.pumpWidget(buildApp(prefs: FakePreferences(onboardingSeen: true), online: false));
     await tester.pumpAndSettle();
     expect(find.textContaining("You're offline"), findsOneWidget);
+  });
+
+  testWidgets('host reply shows a badge, a timeline and the reply; opening Enquiries clears the badge', (tester) async {
+    final prefs = FakePreferences(onboardingSeen: true);
+    final now = DateTime.now();
+    await tester.pumpWidget(buildApp(
+      prefs: prefs,
+      signedInAs: Profile(id: 'g1', fullName: 'Leah Gitau', createdAt: DateTime(2026)),
+      enquiries: [
+        Enquiry(
+          id: 'e1', propertyId: 'p1', checkIn: now.add(const Duration(days: 10)), checkOut: now.add(const Duration(days: 13)),
+          guestCount: 2, guestName: 'Leah Gitau', guestContact: '+254796886037', status: EnquiryStatus.available,
+          ownerResponse: 'Karibu! Yes, it is available.', seenAt: now.subtract(const Duration(hours: 1)),
+          respondedAt: now.subtract(const Duration(hours: 1)), createdAt: now.subtract(const Duration(hours: 3)),
+          propertyTitle: 'Furnished 1-bedroom in Kileleshwa', listingNumber: 1002,
+        ),
+        Enquiry(
+          id: 'e2', propertyId: 'p2', checkIn: now.add(const Duration(days: 21)), checkOut: now.add(const Duration(days: 24)),
+          guestCount: 4, guestName: 'Leah Gitau', guestContact: '+254796886037', status: EnquiryStatus.newEnquiry,
+          createdAt: now.subtract(const Duration(hours: 2)), propertyTitle: 'Family guest house in South B', listingNumber: 1006,
+        ),
+      ],
+    ));
+    await tester.pumpAndSettle();
+
+    // One host reply the guest has not seen yet.
+    expect(find.descendant(of: find.byType(Badge), matching: find.text('1')), findsWidgets);
+
+    await openTab(tester, 'Enquiries');
+    expect(find.text('Furnished 1-bedroom in Kileleshwa'), findsOneWidget);
+    expect(find.text('Host says available'), findsOneWidget);
+    expect(find.text('Sent'), findsOneWidget);
+    expect(prefs.enquiriesSeenAt, isNotNull, reason: 'opening the list marks replies as seen');
+
+    await tester.tap(find.text('Furnished 1-bedroom in Kileleshwa'));
+    await tester.pumpAndSettle();
+    expect(find.text('Host says it is available'), findsOneWidget);
+    expect(find.text('Karibu! Yes, it is available.'), findsOneWidget);
+    await tester.scrollUntilVisible(find.text('We agreed a stay'), 300, scrollable: find.byType(Scrollable).last);
+    expect(find.textContaining('not a booking'), findsOneWidget);
+    expect(find.text('WhatsApp the host'), findsOneWidget);
+    expect(find.text('We agreed a stay'), findsOneWidget);
   });
 
   test('WhatsApp message quotes the listing reference and dates', () {

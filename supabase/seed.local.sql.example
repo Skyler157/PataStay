@@ -1,0 +1,14 @@
+-- Personal local test data, loaded after seed.sql on `supabase db reset`.
+-- Copy to seed.local.sql (gitignored) and put your own details in.
+-- Never commit real emails or phone numbers.
+
+update auth.users set email = 'your-guest-email@example.com' where id = '00000000-0000-4000-a000-000000000003';
+update auth.users set email = 'your-host-email@example.com'  where id = '00000000-0000-4000-a000-000000000002';
+update auth.identities set identity_data = identity_data || jsonb_build_object('email', u.email)
+  from auth.users u where u.id = auth.identities.user_id and auth.identities.provider = 'email';
+
+-- WhatsApp / call number used by the sample listings (no re-review on seed data).
+set session_replication_role = replica;
+update public.property_contacts set phone = '+254700000000', whatsapp_phone = '+254700000000'
+  where property_id in (select id from public.properties where is_seed);
+set session_replication_role = origin;

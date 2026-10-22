@@ -85,21 +85,41 @@ class _Placeholder extends StatelessWidget {
   Widget build(BuildContext context) {
     return DecoratedBox(
       decoration: BoxDecoration(color: context.palette.neutralContainer),
-      child: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.photo_outlined, color: context.palette.mutedText, size: 32),
-            const SizedBox(height: Space.xs),
-            Text(label, style: context.text.labelMedium?.copyWith(color: context.palette.mutedText)),
-          ],
-        ),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          // Small thumbnails (lists, enquiry tiles) only have room for the icon.
+          final roomy = constraints.maxHeight >= 110 && constraints.maxWidth >= 140;
+          return Center(
+            child: Semantics(
+              label: label,
+              child: roomy
+                  ? Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.photo_outlined, color: context.palette.mutedText, size: 32),
+                        const SizedBox(height: Space.xs),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: Space.sm),
+                          child: Text(
+                            label,
+                            textAlign: TextAlign.center,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: context.text.labelMedium?.copyWith(color: context.palette.mutedText),
+                          ),
+                        ),
+                      ],
+                    )
+                  : Icon(Icons.photo_outlined, color: context.palette.mutedText, size: 24),
+            ),
+          );
+        },
       ),
     );
   }
 }
 
-enum BadgeTone { verified, sample, warning, neutral }
+enum BadgeTone { verified, featured, sample, warning, neutral }
 
 class PataBadge extends StatelessWidget {
   const PataBadge({super.key, required this.label, this.tone = BadgeTone.neutral, this.icon});
@@ -113,6 +133,7 @@ class PataBadge extends StatelessWidget {
     final p = context.palette;
     final (Color fg, Color bg) = switch (tone) {
       BadgeTone.verified => (p.verified, p.verifiedContainer),
+      BadgeTone.featured => (PataColors.ink, PataColors.saffron),
       BadgeTone.sample => (context.colors.onSecondaryContainer, context.colors.secondaryContainer),
       BadgeTone.warning => (p.warning, p.warningContainer),
       BadgeTone.neutral => (context.colors.onSurface, p.neutralContainer),
@@ -237,7 +258,7 @@ class FavouriteButton extends ConsumerWidget {
         // use fixed colours there; elsewhere follow the theme.
         color: onPhoto
             ? (saved ? PataColors.clay : PataColors.ink)
-            : (saved ? context.colors.secondary : context.colors.onSurface),
+            : (saved ? (Theme.of(context).brightness == Brightness.dark ? PataColors.clayLight : PataColors.clay) : context.colors.onSurface),
       ),
     );
     if (!onPhoto) return button;
@@ -293,6 +314,7 @@ class PropertyCard extends ConsumerWidget {
                         spacing: Space.xs,
                         runSpacing: Space.xs,
                         children: [
+                          if (p.isFeatured) const PataBadge(label: 'Featured', tone: BadgeTone.featured, icon: Icons.star_rounded),
                           if (p.verifiedAt != null) VerifiedBadge(verifiedAt: p.verifiedAt!),
                           if (sample) const SampleBadge(),
                         ],

@@ -48,7 +48,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
         Text('Welcome back', style: context.text.headlineMedium),
         Gap.sm,
         Text(
-          'Sign in to save places, send enquiries and contact hosts.',
+          'One account for finding a stay and for hosting one.',
           style: context.text.bodyLarge?.copyWith(color: context.palette.mutedText),
         ),
         Gap.xl,
@@ -100,6 +100,8 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
             ),
           ],
         ),
+        Gap.xl,
+        const AccountBenefits(),
       ],
     );
   }

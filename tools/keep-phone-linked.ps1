@@ -3,7 +3,7 @@
 # Usage (leave the window open while testing):
 #   powershell -ExecutionPolicy Bypass -File tools\keep-phone-linked.ps1
 $adb = "$env:LOCALAPPDATA\Android\Sdk\platform-tools\adb.exe"
-$port = 54321
+$port = 58321
 Write-Host "Keeping phone linked to local backend on port $port. Press Ctrl+C to stop."
 while ($true) {
   $devices = & $adb devices | Select-String "\tdevice$" | ForEach-Object { ($_ -split "\t")[0] }
