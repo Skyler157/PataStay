@@ -28,3 +28,5 @@ Thumbs.db
 
 # Local test photos (not committed)
 sample-photos/
+supabase/seed.local.sql
+!supabase/.env.example

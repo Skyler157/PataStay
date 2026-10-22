@@ -79,9 +79,11 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         Text('Create your account', style: context.text.headlineMedium),
         Gap.sm,
         Text(
-          'Browsing is free and open to everyone. An account lets you save places and contact hosts.',
+          'Browsing is free and open to everyone. Creating an account is free too.',
           style: context.text.bodyLarge?.copyWith(color: context.palette.mutedText),
         ),
+        Gap.lg,
+        const AccountBenefits(),
         Gap.xl,
         Form(
           key: _formKey,

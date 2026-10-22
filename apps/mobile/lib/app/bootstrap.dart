@@ -1,5 +1,4 @@
-import 'dart:ui';
-
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:patastay_core/patastay_core.dart';
@@ -46,6 +45,12 @@ Future<void> bootstrap() async {
       overrides: [
         appConfigProvider.overrideWithValue(config),
         localPreferencesProvider.overrideWithValue(SharedLocalPreferences(preferences)),
+        // In a browser, email links (password reset, confirmation) must come
+        // back to this site rather than to the phone app's deep link.
+        if (kIsWeb)
+          authRepositoryProvider.overrideWith(
+            (ref) => AuthRepository(ref.watch(supabaseClientProvider).auth, redirectUrl: Uri.base.origin),
+          ),
       ],
       child: const PataStayApp(),
     ),

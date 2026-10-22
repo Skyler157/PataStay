@@ -78,6 +78,8 @@ OpenStreetMap's public tile server is fine for development and early testing, bu
 
 MapTiler, Stadia Maps and Mapbox all offer free or low-cost tiers. No code changes are needed.
 
+> **Ports.** The local stack uses ports 58320–58329 (set in `supabase/config.toml`). Windows can reserve port blocks after updates. If `supabase start` fails with "access permissions", run `netsh interface ipv4 show excludedportrange protocol=tcp` and move the ports to a free range.
+
 ## Running
 
 ```powershell
@@ -92,9 +94,9 @@ flutter run --dart-define-from-file=../../env/dev.json
 ```
 
 **Reaching the local backend from a phone.** `127.0.0.1` points at the phone itself, not your PC.
-- Android emulator: set `SUPABASE_URL` to `http://10.0.2.2:54321`.
-- Physical phone on the same Wi-Fi: use your PC's LAN IP (run `ipconfig`), for example `http://192.168.1.20:54321`, and allow port 54321 through Windows Firewall.
-- Physical phone over USB: run `adb reverse tcp:54321 tcp:54321` and keep `http://127.0.0.1:54321`. The link drops whenever the USB connection blips; `tools/keep-phone-linked.ps1` re-creates it automatically.
+- Android emulator: set `SUPABASE_URL` to `http://10.0.2.2:58321`.
+- Physical phone on the same Wi-Fi: use your PC's LAN IP (run `ipconfig`), for example `http://192.168.1.20:58321`, and allow port 58321 through Windows Firewall.
+- Physical phone over USB: run `adb reverse tcp:58321 tcp:58321` and keep `http://127.0.0.1:58321`. The link drops whenever the USB connection blips; `tools/keep-phone-linked.ps1` re-creates it automatically.
 
 ### Local accounts (seed data)
 
@@ -106,8 +108,8 @@ Every account uses the password `PataStay#Dev2026`. `supabase db reset` deletes 
 | owner@patastay.local | Host (owns 6 sample listings) |
 | guest@patastay.local | Guest |
 
-- Supabase Studio: http://127.0.0.1:54323
-- Local email inbox (password resets, confirmations): http://127.0.0.1:54324
+- Supabase Studio: http://127.0.0.1:58323
+- Local email inbox (password resets, confirmations): http://127.0.0.1:58324
 
 ## Database migrations
 

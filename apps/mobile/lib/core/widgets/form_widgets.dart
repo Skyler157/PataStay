@@ -118,3 +118,70 @@ extension FeedbackContext on BuildContext {
 
   void showFailure(Object error) => showMessage(mapToFailure(error).message);
 }
+
+/// What a PataStay account offers guests and hosts (sign-in and register).
+class AccountBenefits extends StatelessWidget {
+  const AccountBenefits({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(Space.lg),
+      decoration: BoxDecoration(
+        color: context.palette.neutralContainer,
+        borderRadius: BorderRadius.circular(Radii.lg),
+      ),
+      child: const Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _Benefit(
+            icon: Icons.travel_explore_rounded,
+            title: 'Looking for a place to stay?',
+            body: 'Save places you like, send enquiries, chat with hosts on WhatsApp and keep track of their replies.',
+          ),
+          SizedBox(height: Space.lg),
+          _Benefit(
+            icon: Icons.home_work_outlined,
+            title: 'Have a place to rent out?',
+            body: 'List it for free, receive enquiries from guests, see how many people view and save it, '
+                'and earn a Verified badge that guests trust.',
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _Benefit extends StatelessWidget {
+  const _Benefit({required this.icon, required this.title, required this.body});
+
+  final IconData icon;
+  final String title;
+  final String body;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(color: context.colors.primaryContainer, shape: BoxShape.circle),
+          child: Icon(icon, size: 22, color: context.colors.onPrimaryContainer),
+        ),
+        const SizedBox(width: Space.md),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(title, style: context.text.titleSmall),
+              const SizedBox(height: Space.xxs),
+              Text(body, style: context.text.bodyMedium?.copyWith(color: context.palette.mutedText)),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}

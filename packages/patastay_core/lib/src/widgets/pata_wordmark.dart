@@ -123,7 +123,7 @@ class _MarkPainter extends CustomPainter {
       Paint()
         ..color = accent == Colors.white
             ? Colors.white
-            : const Color(0xFFF0A07E),
+            : PataColors.saffron,
     );
   }
 
