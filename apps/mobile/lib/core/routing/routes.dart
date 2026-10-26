@@ -16,11 +16,22 @@ abstract final class Routes {
   static String enquire(String propertyId) => '/property/$propertyId/enquire';
   static String enquiry(String id) => '/enquiries/$id';
 
+  // Host area.
+  static const hostDashboard = '/profile/host';
+  static const hostEnquiries = '/profile/host/enquiries';
+  static String hostEnquiry(String id) => '/profile/host/enquiries/$id';
+  static String hostListing(String id) => '/profile/host/listing/$id';
+  static String hostEdit(String id, {int step = 0}) => '/host/edit/$id${step > 0 ? '?step=$step' : ''}';
+
   static const _requiresAuth = {editProfile, updatePassword, enquirySent};
   static const _authEntry = {signIn, register, forgotPassword};
   static final _enquirePath = RegExp(r'^/property/[^/]+/enquire$');
 
-  static bool requiresAuth(String location) => _requiresAuth.contains(location) || _enquirePath.hasMatch(location);
+  static bool requiresAuth(String location) =>
+      _requiresAuth.contains(location) ||
+      _enquirePath.hasMatch(location) ||
+      location.startsWith(hostDashboard) ||
+      location.startsWith('/host/');
 
   /// Screens a signed-in user should be sent away from.
   static bool isAuthEntry(String location) => _authEntry.contains(location);

@@ -10,6 +10,7 @@ abstract class PropertyImage with _$PropertyImage {
   const PropertyImage._();
 
   const factory PropertyImage({
+    String? id,
     required String storagePath,
     String? thumbnailPath,
     @Default(0) int displayOrder,
@@ -20,6 +21,7 @@ abstract class PropertyImage with _$PropertyImage {
   bool get isPlaceholder => storagePath.startsWith('seed/');
 
   static PropertyImage fromRow(Map<String, dynamic> row) => PropertyImage(
+        id: row['id'] as String?,
         storagePath: row['storage_path'] as String,
         thumbnailPath: row['thumbnail_path'] as String?,
         displayOrder: (row['display_order'] as num?)?.toInt() ?? 0,
@@ -29,7 +31,7 @@ abstract class PropertyImage with _$PropertyImage {
 
 @freezed
 abstract class UnavailableRange with _$UnavailableRange {
-  const factory UnavailableRange({required DateTime startsOn, required DateTime endsOn, String? note}) =
+  const factory UnavailableRange({String? id, required DateTime startsOn, required DateTime endsOn, String? note}) =
       _UnavailableRange;
 }
 
@@ -134,6 +136,7 @@ abstract class Property with _$Property {
     final unavailable = ((row['property_unavailable_dates'] as List?) ?? const [])
         .cast<Map<String, dynamic>>()
         .map((r) => UnavailableRange(
+              id: r['id'] as String?,
               startsOn: DateTime.parse(r['starts_on'] as String),
               endsOn: DateTime.parse(r['ends_on'] as String),
               note: r['note'] as String?,
@@ -183,11 +186,25 @@ abstract class Property with _$Property {
 /// Public host details (first name only; never contact details).
 @freezed
 abstract class HostSummary with _$HostSummary {
+  const HostSummary._();
+
+  /// "Usually replies within an hour" etc., or null when not enough data.
+  String? get responseLabel {
+    final h = typicalResponseHours;
+    if (h == null) return null;
+    if (h <= 1) return 'Usually replies within an hour';
+    if (h <= 24) return 'Usually replies within ${h.ceil()} hours';
+    return 'Usually replies within ${(h / 24).ceil()} days';
+  }
+
   const factory HostSummary({
     required String displayName,
     required DateTime memberSince,
     @Default(0) int publishedListings,
     @Default(0) int verifiedListings,
+
+    /// Median reply time; only set once the host has answered 5+ enquiries.
+    double? typicalResponseHours,
   }) = _HostSummary;
 }
 

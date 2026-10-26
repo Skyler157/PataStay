@@ -570,6 +570,11 @@ class _HostCard extends ConsumerWidget {
                     '${host.verifiedListings > 0 ? ' · ${host.verifiedListings} verified' : ''}',
                     style: context.text.bodySmall,
                   ),
+                  if (host.responseLabel != null)
+                    Text(
+                      host.responseLabel!,
+                      style: context.text.labelMedium?.copyWith(color: context.colors.primary),
+                    ),
                 ],
               ),
             ),

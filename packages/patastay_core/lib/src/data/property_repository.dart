@@ -103,6 +103,7 @@ class PropertyRepository {
         memberSince: DateTime.parse(r['member_since'] as String),
         publishedListings: (r['published_listings'] as num?)?.toInt() ?? 0,
         verifiedListings: (r['verified_listings'] as num?)?.toInt() ?? 0,
+        typicalResponseHours: (r['typical_response_hours'] as num?)?.toDouble(),
       );
     });
   }
