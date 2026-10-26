@@ -5,6 +5,7 @@ import 'package:patastay_core/patastay_core.dart';
 
 import '../../../core/routing/routes.dart';
 import '../../../core/storage/local_preferences.dart';
+import '../../host/application/host_providers.dart';
 import '../../../core/widgets/form_widgets.dart';
 
 class ProfileScreen extends ConsumerWidget {
@@ -158,6 +159,24 @@ class _ProfileView extends ConsumerWidget {
             subtitle: Text(Dates.day(profile.createdAt)),
           ),
           const Divider(),
+          if (profile.canHost)
+            ListTile(
+              leading: Badge(
+                isLabelVisible: ref.watch(newHostEnquiriesProvider) > 0,
+                label: Text('${ref.watch(newHostEnquiriesProvider)}'),
+                child: const Icon(Icons.home_work_outlined),
+              ),
+              title: const Text('Hosting'),
+              subtitle: const Text('Your listings and guest enquiries'),
+              trailing: const Icon(Icons.chevron_right_rounded),
+              onTap: () => context.push(Routes.hostDashboard),
+            )
+          else if (!profile.isSuspended)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: Space.gutter, vertical: Space.sm),
+              child: _BecomeHostCard(),
+            ),
+          const Divider(),
           ListTile(
             leading: const Icon(Icons.edit_outlined),
             title: const Text('Edit profile'),
@@ -258,4 +277,65 @@ Future<void> showAppearanceSheet(BuildContext context) {
       },
     ),
   );
+}
+
+/// Turns a guest account into a host account (it cannot grant admin).
+class _BecomeHostCard extends ConsumerStatefulWidget {
+  @override
+  ConsumerState<_BecomeHostCard> createState() => _BecomeHostCardState();
+}
+
+class _BecomeHostCardState extends ConsumerState<_BecomeHostCard> {
+  bool _busy = false;
+
+  Future<void> _start() async {
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Start hosting on PataStay?'),
+        content: const Text(
+          'You can list places for free. Every listing is checked by our team before guests can see it, '
+          'and you keep your guest account too.',
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Not now')),
+          TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('Start hosting')),
+        ],
+      ),
+    );
+    if (ok != true) return;
+    setState(() => _busy = true);
+    try {
+      await ref.read(profileRepositoryProvider).becomeOwner();
+      ref.invalidate(currentProfileProvider);
+      if (mounted) context.push(Routes.hostDashboard);
+    } on AppFailure catch (failure) {
+      if (mounted) context.showFailure(failure);
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(Space.lg),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Row(children: [
+            Icon(Icons.add_home_outlined, color: context.colors.primary),
+            Gap.sm,
+            Expanded(child: Text('Have a place to rent out?', style: context.text.titleSmall)),
+          ]),
+          Gap.xs,
+          Text(
+            'List it for free, get enquiries from guests and see how many people view and save it.',
+            style: context.text.bodyMedium?.copyWith(color: context.palette.mutedText),
+          ),
+          Gap.md,
+          BusyButton(label: 'List your place', busy: _busy, onPressed: _start),
+        ]),
+      ),
+    );
+  }
 }

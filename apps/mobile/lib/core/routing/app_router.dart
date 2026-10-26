@@ -13,6 +13,10 @@ import '../../features/enquiries/presentation/enquiry_form_screen.dart';
 import '../../features/enquiries/presentation/my_enquiries_screen.dart';
 import '../../features/favourites/presentation/saved_screen.dart';
 import '../../features/home/presentation/home_screen.dart';
+import '../../features/host/presentation/host_dashboard_screen.dart';
+import '../../features/host/presentation/host_enquiries_screen.dart';
+import '../../features/host/presentation/listing_editor_screen.dart';
+import '../../features/host/presentation/manage_listing_screen.dart';
 import '../../features/onboarding/presentation/onboarding_screen.dart';
 import '../../features/profile/presentation/edit_profile_screen.dart';
 import '../../features/profile/presentation/profile_screen.dart';
@@ -64,6 +68,13 @@ final routerProvider = Provider<GoRouter>((ref) {
         ],
       ),
       GoRoute(
+        path: '/host/edit/:id',
+        builder: (_, state) => ListingEditorScreen(
+          listingId: state.pathParameters['id']!,
+          initialStep: int.tryParse(state.uri.queryParameters['step'] ?? '') ?? 0,
+        ),
+      ),
+      GoRoute(
         path: Routes.enquirySent,
         builder: (_, state) => EnquirySentScreen(enquiry: state.extra is Enquiry ? state.extra! as Enquiry : null),
       ),
@@ -93,7 +104,26 @@ final routerProvider = Provider<GoRouter>((ref) {
             GoRoute(
               path: Routes.profile,
               builder: (_, _) => const ProfileScreen(),
-              routes: [GoRoute(path: 'edit', builder: (_, _) => const EditProfileScreen())],
+              routes: [
+                GoRoute(path: 'edit', builder: (_, _) => const EditProfileScreen()),
+                GoRoute(
+                  path: 'host',
+                  builder: (_, _) => const HostDashboardScreen(),
+                  routes: [
+                    GoRoute(
+                      path: 'enquiries',
+                      builder: (_, _) => const HostEnquiriesScreen(),
+                      routes: [
+                        GoRoute(path: ':id', builder: (_, state) => HostEnquiryScreen(enquiryId: state.pathParameters['id']!)),
+                      ],
+                    ),
+                    GoRoute(
+                      path: 'listing/:id',
+                      builder: (_, state) => ManageListingScreen(listingId: state.pathParameters['id']!),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ]),
         ],

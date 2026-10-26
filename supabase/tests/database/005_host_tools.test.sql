@@ -72,18 +72,22 @@ update public.properties set status = 'published', approved_at = now() where id 
 
 set local request.jwt.claims to '{"sub":"11000000-0000-4000-a000-000000000003","role":"authenticated"}';
 set local role authenticated;
-insert into public.enquiries (id, property_id, check_in, check_out, guest_count, guest_name, guest_contact)
-values ('13000000-0000-4000-a000-000000000001', '12000000-0000-4000-a000-000000000001',
-        current_date + 5, current_date + 7, 2, 'Gabriel Guest', '+254722000222');
+insert into public.enquiries (property_id, check_in, check_out, guest_count, guest_name, guest_contact)
+values ('12000000-0000-4000-a000-000000000001', current_date + 5, current_date + 7, 2, 'Gabriel Guest', '+254722000222');
+-- Remember the new enquiry's id for the host steps below.
+do $$ begin
+  perform set_config('test.enquiry_id', (select id::text from public.enquiries
+    where property_id = '12000000-0000-4000-a000-000000000001' limit 1), true);
+end $$;
 
 reset role;
 set local request.jwt.claims to '{"sub":"11000000-0000-4000-a000-000000000001","role":"authenticated"}';
 set local role authenticated;
-select is((select guest_contact from public.enquiries where id = '13000000-0000-4000-a000-000000000001'),
+select is((select guest_contact from public.enquiries where id = current_setting('test.enquiry_id')::uuid),
   '+254722000222', 'host sees the guest''s reply contact');
-select is(public.owner_update_enquiry('13000000-0000-4000-a000-000000000001', 'available', 'Yes, it is free. Call me.'),
+select is(public.owner_update_enquiry(current_setting('test.enquiry_id')::uuid, 'available', 'Yes, it is free. Call me.'),
   'available'::public.enquiry_status, 'host can say the place is available');
-select ok((select responded_at is not null from public.enquiries where id = '13000000-0000-4000-a000-000000000001'),
+select ok((select responded_at is not null from public.enquiries where id = current_setting('test.enquiry_id')::uuid),
   'reply time is recorded');
 
 -- Response time appears only after 5 answered enquiries.
@@ -91,6 +95,7 @@ select is((select typical_response_hours from public.get_host_summary('12000000-
   'no response time shown with fewer than 5 replies');
 
 reset role;
+set local request.jwt.claims to '{"sub":"11000000-0000-4000-a000-000000000003","role":"authenticated"}';
 insert into public.enquiries (property_id, guest_id, check_in, check_out, guest_count, guest_name, guest_contact, status, created_at, responded_at)
 select '12000000-0000-4000-a000-000000000001', '11000000-0000-4000-a000-000000000003', current_date + 20 + g, current_date + 22 + g,
   1, 'Gabriel Guest', '+254722000222', 'available', now() - interval '3 days', now() - interval '3 days' + interval '2 hours'

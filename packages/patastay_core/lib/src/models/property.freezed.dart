@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$PropertyImage {
 
- String get storagePath; String? get thumbnailPath; int get displayOrder; String? get caption;
+ String? get id; String get storagePath; String? get thumbnailPath; int get displayOrder; String? get caption;
 /// Create a copy of PropertyImage
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -27,20 +27,20 @@ $PropertyImageCopyWith<PropertyImage> get copyWith => _$PropertyImageCopyWithImp
 @override
 bool operator ==(Object other) {
   final _this = this as PropertyImage;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is PropertyImage&&(identical(other.storagePath, _this.storagePath) || other.storagePath == _this.storagePath)&&(identical(other.thumbnailPath, _this.thumbnailPath) || other.thumbnailPath == _this.thumbnailPath)&&(identical(other.displayOrder, _this.displayOrder) || other.displayOrder == _this.displayOrder)&&(identical(other.caption, _this.caption) || other.caption == _this.caption));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is PropertyImage&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.storagePath, _this.storagePath) || other.storagePath == _this.storagePath)&&(identical(other.thumbnailPath, _this.thumbnailPath) || other.thumbnailPath == _this.thumbnailPath)&&(identical(other.displayOrder, _this.displayOrder) || other.displayOrder == _this.displayOrder)&&(identical(other.caption, _this.caption) || other.caption == _this.caption));
 }
 
 
 @override
 int get hashCode {
   final _this = this as PropertyImage;
-  return Object.hash(runtimeType,_this.storagePath,_this.thumbnailPath,_this.displayOrder,_this.caption);
+  return Object.hash(runtimeType,_this.id,_this.storagePath,_this.thumbnailPath,_this.displayOrder,_this.caption);
 }
 
 @override
 String toString() {
   final _this = this as PropertyImage;
-  return 'PropertyImage(storagePath: ${_this.storagePath}, thumbnailPath: ${_this.thumbnailPath}, displayOrder: ${_this.displayOrder}, caption: ${_this.caption})';
+  return 'PropertyImage(id: ${_this.id}, storagePath: ${_this.storagePath}, thumbnailPath: ${_this.thumbnailPath}, displayOrder: ${_this.displayOrder}, caption: ${_this.caption})';
 }
 
 
@@ -51,7 +51,7 @@ abstract mixin class $PropertyImageCopyWith<$Res>  {
   factory $PropertyImageCopyWith(PropertyImage value, $Res Function(PropertyImage) _then) = _$PropertyImageCopyWithImpl;
 @useResult
 $Res call({
- String storagePath, String? thumbnailPath, int displayOrder, String? caption
+ String? id, String storagePath, String? thumbnailPath, int displayOrder, String? caption
 });
 
 
@@ -68,9 +68,10 @@ class _$PropertyImageCopyWithImpl<$Res>
 
 /// Create a copy of PropertyImage
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? storagePath = null,Object? thumbnailPath = freezed,Object? displayOrder = null,Object? caption = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = freezed,Object? storagePath = null,Object? thumbnailPath = freezed,Object? displayOrder = null,Object? caption = freezed,}) {
   return _then(PropertyImage(
-storagePath: null == storagePath ? _self.storagePath : storagePath // ignore: cast_nullable_to_non_nullable
+id: freezed == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as String?,storagePath: null == storagePath ? _self.storagePath : storagePath // ignore: cast_nullable_to_non_nullable
 as String,thumbnailPath: freezed == thumbnailPath ? _self.thumbnailPath : thumbnailPath // ignore: cast_nullable_to_non_nullable
 as String?,displayOrder: null == displayOrder ? _self.displayOrder : displayOrder // ignore: cast_nullable_to_non_nullable
 as int,caption: freezed == caption ? _self.caption : caption // ignore: cast_nullable_to_non_nullable
@@ -159,10 +160,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String storagePath,  String? thumbnailPath,  int displayOrder,  String? caption)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? id,  String storagePath,  String? thumbnailPath,  int displayOrder,  String? caption)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _PropertyImage() when $default != null:
-return $default(_that.storagePath,_that.thumbnailPath,_that.displayOrder,_that.caption);case _:
+return $default(_that.id,_that.storagePath,_that.thumbnailPath,_that.displayOrder,_that.caption);case _:
   return orElse();
 
 }
@@ -180,10 +181,10 @@ return $default(_that.storagePath,_that.thumbnailPath,_that.displayOrder,_that.c
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String storagePath,  String? thumbnailPath,  int displayOrder,  String? caption)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? id,  String storagePath,  String? thumbnailPath,  int displayOrder,  String? caption)  $default,) {final _that = this;
 switch (_that) {
 case _PropertyImage():
-return $default(_that.storagePath,_that.thumbnailPath,_that.displayOrder,_that.caption);case _:
+return $default(_that.id,_that.storagePath,_that.thumbnailPath,_that.displayOrder,_that.caption);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -200,10 +201,10 @@ return $default(_that.storagePath,_that.thumbnailPath,_that.displayOrder,_that.c
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String storagePath,  String? thumbnailPath,  int displayOrder,  String? caption)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? id,  String storagePath,  String? thumbnailPath,  int displayOrder,  String? caption)?  $default,) {final _that = this;
 switch (_that) {
 case _PropertyImage() when $default != null:
-return $default(_that.storagePath,_that.thumbnailPath,_that.displayOrder,_that.caption);case _:
+return $default(_that.id,_that.storagePath,_that.thumbnailPath,_that.displayOrder,_that.caption);case _:
   return null;
 
 }
@@ -215,9 +216,10 @@ return $default(_that.storagePath,_that.thumbnailPath,_that.displayOrder,_that.c
 
 
 class _PropertyImage extends PropertyImage {
-  const _PropertyImage({required this.storagePath, this.thumbnailPath, this.displayOrder = 0, this.caption}): super._();
+  const _PropertyImage({this.id, required this.storagePath, this.thumbnailPath, this.displayOrder = 0, this.caption}): super._();
   
 
+@override final  String? id;
 @override final  String storagePath;
 @override final  String? thumbnailPath;
 @override@JsonKey() final  int displayOrder;
@@ -233,18 +235,18 @@ _$PropertyImageCopyWith<_PropertyImage> get copyWith => __$PropertyImageCopyWith
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _PropertyImage&&(identical(other.storagePath, storagePath) || other.storagePath == storagePath)&&(identical(other.thumbnailPath, thumbnailPath) || other.thumbnailPath == thumbnailPath)&&(identical(other.displayOrder, displayOrder) || other.displayOrder == displayOrder)&&(identical(other.caption, caption) || other.caption == caption));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _PropertyImage&&(identical(other.id, id) || other.id == id)&&(identical(other.storagePath, storagePath) || other.storagePath == storagePath)&&(identical(other.thumbnailPath, thumbnailPath) || other.thumbnailPath == thumbnailPath)&&(identical(other.displayOrder, displayOrder) || other.displayOrder == displayOrder)&&(identical(other.caption, caption) || other.caption == caption));
 }
 
 
 @override
 int get hashCode {
-    return Object.hash(runtimeType,storagePath,thumbnailPath,displayOrder,caption);
+    return Object.hash(runtimeType,id,storagePath,thumbnailPath,displayOrder,caption);
 }
 
 @override
 String toString() {
-    return 'PropertyImage(storagePath: $storagePath, thumbnailPath: $thumbnailPath, displayOrder: $displayOrder, caption: $caption)';
+    return 'PropertyImage(id: $id, storagePath: $storagePath, thumbnailPath: $thumbnailPath, displayOrder: $displayOrder, caption: $caption)';
 }
 
 
@@ -255,7 +257,7 @@ abstract mixin class _$PropertyImageCopyWith<$Res> implements $PropertyImageCopy
   factory _$PropertyImageCopyWith(_PropertyImage value, $Res Function(_PropertyImage) _then) = __$PropertyImageCopyWithImpl;
 @override @useResult
 $Res call({
- String storagePath, String? thumbnailPath, int displayOrder, String? caption
+ String? id, String storagePath, String? thumbnailPath, int displayOrder, String? caption
 });
 
 
@@ -272,9 +274,10 @@ class __$PropertyImageCopyWithImpl<$Res>
 
 /// Create a copy of PropertyImage
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? storagePath = null,Object? thumbnailPath = freezed,Object? displayOrder = null,Object? caption = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = freezed,Object? storagePath = null,Object? thumbnailPath = freezed,Object? displayOrder = null,Object? caption = freezed,}) {
   return _then(_PropertyImage(
-storagePath: null == storagePath ? _self.storagePath : storagePath // ignore: cast_nullable_to_non_nullable
+id: freezed == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as String?,storagePath: null == storagePath ? _self.storagePath : storagePath // ignore: cast_nullable_to_non_nullable
 as String,thumbnailPath: freezed == thumbnailPath ? _self.thumbnailPath : thumbnailPath // ignore: cast_nullable_to_non_nullable
 as String?,displayOrder: null == displayOrder ? _self.displayOrder : displayOrder // ignore: cast_nullable_to_non_nullable
 as int,caption: freezed == caption ? _self.caption : caption // ignore: cast_nullable_to_non_nullable
@@ -288,7 +291,7 @@ as String?,
 /// @nodoc
 mixin _$UnavailableRange {
 
- DateTime get startsOn; DateTime get endsOn; String? get note;
+ String? get id; DateTime get startsOn; DateTime get endsOn; String? get note;
 /// Create a copy of UnavailableRange
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -300,20 +303,20 @@ $UnavailableRangeCopyWith<UnavailableRange> get copyWith => _$UnavailableRangeCo
 @override
 bool operator ==(Object other) {
   final _this = this as UnavailableRange;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is UnavailableRange&&(identical(other.startsOn, _this.startsOn) || other.startsOn == _this.startsOn)&&(identical(other.endsOn, _this.endsOn) || other.endsOn == _this.endsOn)&&(identical(other.note, _this.note) || other.note == _this.note));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is UnavailableRange&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.startsOn, _this.startsOn) || other.startsOn == _this.startsOn)&&(identical(other.endsOn, _this.endsOn) || other.endsOn == _this.endsOn)&&(identical(other.note, _this.note) || other.note == _this.note));
 }
 
 
 @override
 int get hashCode {
   final _this = this as UnavailableRange;
-  return Object.hash(runtimeType,_this.startsOn,_this.endsOn,_this.note);
+  return Object.hash(runtimeType,_this.id,_this.startsOn,_this.endsOn,_this.note);
 }
 
 @override
 String toString() {
   final _this = this as UnavailableRange;
-  return 'UnavailableRange(startsOn: ${_this.startsOn}, endsOn: ${_this.endsOn}, note: ${_this.note})';
+  return 'UnavailableRange(id: ${_this.id}, startsOn: ${_this.startsOn}, endsOn: ${_this.endsOn}, note: ${_this.note})';
 }
 
 
@@ -324,7 +327,7 @@ abstract mixin class $UnavailableRangeCopyWith<$Res>  {
   factory $UnavailableRangeCopyWith(UnavailableRange value, $Res Function(UnavailableRange) _then) = _$UnavailableRangeCopyWithImpl;
 @useResult
 $Res call({
- DateTime startsOn, DateTime endsOn, String? note
+ String? id, DateTime startsOn, DateTime endsOn, String? note
 });
 
 
@@ -341,9 +344,10 @@ class _$UnavailableRangeCopyWithImpl<$Res>
 
 /// Create a copy of UnavailableRange
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? startsOn = null,Object? endsOn = null,Object? note = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = freezed,Object? startsOn = null,Object? endsOn = null,Object? note = freezed,}) {
   return _then(UnavailableRange(
-startsOn: null == startsOn ? _self.startsOn : startsOn // ignore: cast_nullable_to_non_nullable
+id: freezed == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as String?,startsOn: null == startsOn ? _self.startsOn : startsOn // ignore: cast_nullable_to_non_nullable
 as DateTime,endsOn: null == endsOn ? _self.endsOn : endsOn // ignore: cast_nullable_to_non_nullable
 as DateTime,note: freezed == note ? _self.note : note // ignore: cast_nullable_to_non_nullable
 as String?,
@@ -431,10 +435,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( DateTime startsOn,  DateTime endsOn,  String? note)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? id,  DateTime startsOn,  DateTime endsOn,  String? note)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _UnavailableRange() when $default != null:
-return $default(_that.startsOn,_that.endsOn,_that.note);case _:
+return $default(_that.id,_that.startsOn,_that.endsOn,_that.note);case _:
   return orElse();
 
 }
@@ -452,10 +456,10 @@ return $default(_that.startsOn,_that.endsOn,_that.note);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( DateTime startsOn,  DateTime endsOn,  String? note)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? id,  DateTime startsOn,  DateTime endsOn,  String? note)  $default,) {final _that = this;
 switch (_that) {
 case _UnavailableRange():
-return $default(_that.startsOn,_that.endsOn,_that.note);case _:
+return $default(_that.id,_that.startsOn,_that.endsOn,_that.note);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -472,10 +476,10 @@ return $default(_that.startsOn,_that.endsOn,_that.note);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( DateTime startsOn,  DateTime endsOn,  String? note)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? id,  DateTime startsOn,  DateTime endsOn,  String? note)?  $default,) {final _that = this;
 switch (_that) {
 case _UnavailableRange() when $default != null:
-return $default(_that.startsOn,_that.endsOn,_that.note);case _:
+return $default(_that.id,_that.startsOn,_that.endsOn,_that.note);case _:
   return null;
 
 }
@@ -487,9 +491,10 @@ return $default(_that.startsOn,_that.endsOn,_that.note);case _:
 
 
 class _UnavailableRange implements UnavailableRange {
-  const _UnavailableRange({required this.startsOn, required this.endsOn, this.note});
+  const _UnavailableRange({this.id, required this.startsOn, required this.endsOn, this.note});
   
 
+@override final  String? id;
 @override final  DateTime startsOn;
 @override final  DateTime endsOn;
 @override final  String? note;
@@ -504,18 +509,18 @@ _$UnavailableRangeCopyWith<_UnavailableRange> get copyWith => __$UnavailableRang
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _UnavailableRange&&(identical(other.startsOn, startsOn) || other.startsOn == startsOn)&&(identical(other.endsOn, endsOn) || other.endsOn == endsOn)&&(identical(other.note, note) || other.note == note));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _UnavailableRange&&(identical(other.id, id) || other.id == id)&&(identical(other.startsOn, startsOn) || other.startsOn == startsOn)&&(identical(other.endsOn, endsOn) || other.endsOn == endsOn)&&(identical(other.note, note) || other.note == note));
 }
 
 
 @override
 int get hashCode {
-    return Object.hash(runtimeType,startsOn,endsOn,note);
+    return Object.hash(runtimeType,id,startsOn,endsOn,note);
 }
 
 @override
 String toString() {
-    return 'UnavailableRange(startsOn: $startsOn, endsOn: $endsOn, note: $note)';
+    return 'UnavailableRange(id: $id, startsOn: $startsOn, endsOn: $endsOn, note: $note)';
 }
 
 
@@ -526,7 +531,7 @@ abstract mixin class _$UnavailableRangeCopyWith<$Res> implements $UnavailableRan
   factory _$UnavailableRangeCopyWith(_UnavailableRange value, $Res Function(_UnavailableRange) _then) = __$UnavailableRangeCopyWithImpl;
 @override @useResult
 $Res call({
- DateTime startsOn, DateTime endsOn, String? note
+ String? id, DateTime startsOn, DateTime endsOn, String? note
 });
 
 
@@ -543,9 +548,10 @@ class __$UnavailableRangeCopyWithImpl<$Res>
 
 /// Create a copy of UnavailableRange
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? startsOn = null,Object? endsOn = null,Object? note = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = freezed,Object? startsOn = null,Object? endsOn = null,Object? note = freezed,}) {
   return _then(_UnavailableRange(
-startsOn: null == startsOn ? _self.startsOn : startsOn // ignore: cast_nullable_to_non_nullable
+id: freezed == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as String?,startsOn: null == startsOn ? _self.startsOn : startsOn // ignore: cast_nullable_to_non_nullable
 as DateTime,endsOn: null == endsOn ? _self.endsOn : endsOn // ignore: cast_nullable_to_non_nullable
 as DateTime,note: freezed == note ? _self.note : note // ignore: cast_nullable_to_non_nullable
 as String?,
@@ -958,7 +964,8 @@ $NeighbourhoodCopyWith<$Res>? get neighbourhood {
 /// @nodoc
 mixin _$HostSummary {
 
- String get displayName; DateTime get memberSince; int get publishedListings; int get verifiedListings;
+ String get displayName; DateTime get memberSince; int get publishedListings; int get verifiedListings;/// Median reply time; only set once the host has answered 5+ enquiries.
+ double? get typicalResponseHours;
 /// Create a copy of HostSummary
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -970,20 +977,20 @@ $HostSummaryCopyWith<HostSummary> get copyWith => _$HostSummaryCopyWithImpl<Host
 @override
 bool operator ==(Object other) {
   final _this = this as HostSummary;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is HostSummary&&(identical(other.displayName, _this.displayName) || other.displayName == _this.displayName)&&(identical(other.memberSince, _this.memberSince) || other.memberSince == _this.memberSince)&&(identical(other.publishedListings, _this.publishedListings) || other.publishedListings == _this.publishedListings)&&(identical(other.verifiedListings, _this.verifiedListings) || other.verifiedListings == _this.verifiedListings));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is HostSummary&&(identical(other.displayName, _this.displayName) || other.displayName == _this.displayName)&&(identical(other.memberSince, _this.memberSince) || other.memberSince == _this.memberSince)&&(identical(other.publishedListings, _this.publishedListings) || other.publishedListings == _this.publishedListings)&&(identical(other.verifiedListings, _this.verifiedListings) || other.verifiedListings == _this.verifiedListings)&&(identical(other.typicalResponseHours, _this.typicalResponseHours) || other.typicalResponseHours == _this.typicalResponseHours));
 }
 
 
 @override
 int get hashCode {
   final _this = this as HostSummary;
-  return Object.hash(runtimeType,_this.displayName,_this.memberSince,_this.publishedListings,_this.verifiedListings);
+  return Object.hash(runtimeType,_this.displayName,_this.memberSince,_this.publishedListings,_this.verifiedListings,_this.typicalResponseHours);
 }
 
 @override
 String toString() {
   final _this = this as HostSummary;
-  return 'HostSummary(displayName: ${_this.displayName}, memberSince: ${_this.memberSince}, publishedListings: ${_this.publishedListings}, verifiedListings: ${_this.verifiedListings})';
+  return 'HostSummary(displayName: ${_this.displayName}, memberSince: ${_this.memberSince}, publishedListings: ${_this.publishedListings}, verifiedListings: ${_this.verifiedListings}, typicalResponseHours: ${_this.typicalResponseHours})';
 }
 
 
@@ -994,7 +1001,7 @@ abstract mixin class $HostSummaryCopyWith<$Res>  {
   factory $HostSummaryCopyWith(HostSummary value, $Res Function(HostSummary) _then) = _$HostSummaryCopyWithImpl;
 @useResult
 $Res call({
- String displayName, DateTime memberSince, int publishedListings, int verifiedListings
+ String displayName, DateTime memberSince, int publishedListings, int verifiedListings, double? typicalResponseHours
 });
 
 
@@ -1011,13 +1018,14 @@ class _$HostSummaryCopyWithImpl<$Res>
 
 /// Create a copy of HostSummary
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? displayName = null,Object? memberSince = null,Object? publishedListings = null,Object? verifiedListings = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? displayName = null,Object? memberSince = null,Object? publishedListings = null,Object? verifiedListings = null,Object? typicalResponseHours = freezed,}) {
   return _then(HostSummary(
 displayName: null == displayName ? _self.displayName : displayName // ignore: cast_nullable_to_non_nullable
 as String,memberSince: null == memberSince ? _self.memberSince : memberSince // ignore: cast_nullable_to_non_nullable
 as DateTime,publishedListings: null == publishedListings ? _self.publishedListings : publishedListings // ignore: cast_nullable_to_non_nullable
 as int,verifiedListings: null == verifiedListings ? _self.verifiedListings : verifiedListings // ignore: cast_nullable_to_non_nullable
-as int,
+as int,typicalResponseHours: freezed == typicalResponseHours ? _self.typicalResponseHours : typicalResponseHours // ignore: cast_nullable_to_non_nullable
+as double?,
   ));
 }
 
@@ -1102,10 +1110,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String displayName,  DateTime memberSince,  int publishedListings,  int verifiedListings)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String displayName,  DateTime memberSince,  int publishedListings,  int verifiedListings,  double? typicalResponseHours)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _HostSummary() when $default != null:
-return $default(_that.displayName,_that.memberSince,_that.publishedListings,_that.verifiedListings);case _:
+return $default(_that.displayName,_that.memberSince,_that.publishedListings,_that.verifiedListings,_that.typicalResponseHours);case _:
   return orElse();
 
 }
@@ -1123,10 +1131,10 @@ return $default(_that.displayName,_that.memberSince,_that.publishedListings,_tha
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String displayName,  DateTime memberSince,  int publishedListings,  int verifiedListings)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String displayName,  DateTime memberSince,  int publishedListings,  int verifiedListings,  double? typicalResponseHours)  $default,) {final _that = this;
 switch (_that) {
 case _HostSummary():
-return $default(_that.displayName,_that.memberSince,_that.publishedListings,_that.verifiedListings);case _:
+return $default(_that.displayName,_that.memberSince,_that.publishedListings,_that.verifiedListings,_that.typicalResponseHours);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -1143,10 +1151,10 @@ return $default(_that.displayName,_that.memberSince,_that.publishedListings,_tha
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String displayName,  DateTime memberSince,  int publishedListings,  int verifiedListings)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String displayName,  DateTime memberSince,  int publishedListings,  int verifiedListings,  double? typicalResponseHours)?  $default,) {final _that = this;
 switch (_that) {
 case _HostSummary() when $default != null:
-return $default(_that.displayName,_that.memberSince,_that.publishedListings,_that.verifiedListings);case _:
+return $default(_that.displayName,_that.memberSince,_that.publishedListings,_that.verifiedListings,_that.typicalResponseHours);case _:
   return null;
 
 }
@@ -1157,14 +1165,16 @@ return $default(_that.displayName,_that.memberSince,_that.publishedListings,_tha
 /// @nodoc
 
 
-class _HostSummary implements HostSummary {
-  const _HostSummary({required this.displayName, required this.memberSince, this.publishedListings = 0, this.verifiedListings = 0});
+class _HostSummary extends HostSummary {
+  const _HostSummary({required this.displayName, required this.memberSince, this.publishedListings = 0, this.verifiedListings = 0, this.typicalResponseHours}): super._();
   
 
 @override final  String displayName;
 @override final  DateTime memberSince;
 @override@JsonKey() final  int publishedListings;
 @override@JsonKey() final  int verifiedListings;
+/// Median reply time; only set once the host has answered 5+ enquiries.
+@override final  double? typicalResponseHours;
 
 /// Create a copy of HostSummary
 /// with the given fields replaced by the non-null parameter values.
@@ -1176,18 +1186,18 @@ _$HostSummaryCopyWith<_HostSummary> get copyWith => __$HostSummaryCopyWithImpl<_
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _HostSummary&&(identical(other.displayName, displayName) || other.displayName == displayName)&&(identical(other.memberSince, memberSince) || other.memberSince == memberSince)&&(identical(other.publishedListings, publishedListings) || other.publishedListings == publishedListings)&&(identical(other.verifiedListings, verifiedListings) || other.verifiedListings == verifiedListings));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _HostSummary&&(identical(other.displayName, displayName) || other.displayName == displayName)&&(identical(other.memberSince, memberSince) || other.memberSince == memberSince)&&(identical(other.publishedListings, publishedListings) || other.publishedListings == publishedListings)&&(identical(other.verifiedListings, verifiedListings) || other.verifiedListings == verifiedListings)&&(identical(other.typicalResponseHours, typicalResponseHours) || other.typicalResponseHours == typicalResponseHours));
 }
 
 
 @override
 int get hashCode {
-    return Object.hash(runtimeType,displayName,memberSince,publishedListings,verifiedListings);
+    return Object.hash(runtimeType,displayName,memberSince,publishedListings,verifiedListings,typicalResponseHours);
 }
 
 @override
 String toString() {
-    return 'HostSummary(displayName: $displayName, memberSince: $memberSince, publishedListings: $publishedListings, verifiedListings: $verifiedListings)';
+    return 'HostSummary(displayName: $displayName, memberSince: $memberSince, publishedListings: $publishedListings, verifiedListings: $verifiedListings, typicalResponseHours: $typicalResponseHours)';
 }
 
 
@@ -1198,7 +1208,7 @@ abstract mixin class _$HostSummaryCopyWith<$Res> implements $HostSummaryCopyWith
   factory _$HostSummaryCopyWith(_HostSummary value, $Res Function(_HostSummary) _then) = __$HostSummaryCopyWithImpl;
 @override @useResult
 $Res call({
- String displayName, DateTime memberSince, int publishedListings, int verifiedListings
+ String displayName, DateTime memberSince, int publishedListings, int verifiedListings, double? typicalResponseHours
 });
 
 
@@ -1215,13 +1225,14 @@ class __$HostSummaryCopyWithImpl<$Res>
 
 /// Create a copy of HostSummary
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? displayName = null,Object? memberSince = null,Object? publishedListings = null,Object? verifiedListings = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? displayName = null,Object? memberSince = null,Object? publishedListings = null,Object? verifiedListings = null,Object? typicalResponseHours = freezed,}) {
   return _then(_HostSummary(
 displayName: null == displayName ? _self.displayName : displayName // ignore: cast_nullable_to_non_nullable
 as String,memberSince: null == memberSince ? _self.memberSince : memberSince // ignore: cast_nullable_to_non_nullable
 as DateTime,publishedListings: null == publishedListings ? _self.publishedListings : publishedListings // ignore: cast_nullable_to_non_nullable
 as int,verifiedListings: null == verifiedListings ? _self.verifiedListings : verifiedListings // ignore: cast_nullable_to_non_nullable
-as int,
+as int,typicalResponseHours: freezed == typicalResponseHours ? _self.typicalResponseHours : typicalResponseHours // ignore: cast_nullable_to_non_nullable
+as double?,
   ));
 }
 

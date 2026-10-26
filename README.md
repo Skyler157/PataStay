@@ -163,8 +163,8 @@ Android release signing requires `apps/mobile/android/key.properties` and a keys
 |---|---|
 | 1. Foundation: schema, RLS, auth, profiles, routing, theme, admin sign-in and stats | Done |
 | 2. Guest marketplace: home, search and filters, details, favourites, enquiries, WhatsApp/call contact, reports | Done |
-| 3. Host tools: listing wizard, photos, enquiries, statistics | Next |
-| 4. Administration: review queue, verification, reports, users, exports | Planned |
+| 3. Host tools: become a host, dashboard, 9-step listing wizard with photos and map pin, manage listing (availability, blocked dates, pause), enquiries inbox, response time | Done |
+| 4. Administration: review queue, verification, reports, users, exports | Next |
 | 5. Quality and launch | Planned |
 
 Known launch requirement: account-deletion requests (`profiles.deletion_requested_at`) must be processed within 30 days, as the app promises. A service-role Edge Function and admin action for this are planned for Phase 4.

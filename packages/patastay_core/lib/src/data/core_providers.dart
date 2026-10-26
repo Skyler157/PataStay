@@ -6,6 +6,7 @@ import '../models/profile.dart';
 import '../models/reference_data.dart';
 import 'auth_repository.dart';
 import 'guest_repositories.dart';
+import 'host_repository.dart';
 import 'profile_repository.dart';
 import 'property_repository.dart';
 import 'reference_data_repository.dart';
@@ -68,4 +69,8 @@ final enquiryRepositoryProvider = Provider<EnquiryRepository>(
 
 final reportRepositoryProvider = Provider<ReportRepository>(
   (ref) => ReportRepository(ref.watch(supabaseClientProvider)),
+);
+
+final hostRepositoryProvider = Provider<HostRepository>(
+  (ref) => HostRepository(ref.watch(supabaseClientProvider)),
 );

@@ -7,6 +7,7 @@ import 'package:patastay_mobile/app/app.dart';
 import 'package:patastay_mobile/core/connectivity/offline_banner.dart';
 import 'package:patastay_mobile/core/routing/routes.dart';
 import 'package:patastay_mobile/core/storage/local_preferences.dart';
+import 'package:patastay_mobile/features/host/application/host_providers.dart';
 import 'package:patastay_mobile/features/properties/application/property_providers.dart';
 import 'package:patastay_mobile/features/properties/presentation/contact_sheet.dart';
 
@@ -35,6 +36,8 @@ class FakePreferences implements LocalPreferences {
 class MockAuthRepository extends Mock implements AuthRepository {}
 
 class MockPropertyRepository extends Mock implements PropertyRepository {}
+
+class _FakeHostRepository extends Mock implements HostRepository {}
 
 class FakeFavourites extends FavouritesController {
   @override
@@ -81,6 +84,9 @@ Widget buildApp({
   bool online = true,
   Profile? signedInAs,
   List<Enquiry> enquiries = const [],
+  List<HostListing> hostListings = const [],
+  List<Enquiry> hostEnquiries = const [],
+  HostRepository? hostRepository,
 }) {
   final properties = MockPropertyRepository();
   when(() => properties.trackView(any())).thenAnswer((_) async {});
@@ -94,6 +100,11 @@ Widget buildApp({
       currentUserIdProvider.overrideWithValue(signedInAs?.id),
       currentProfileProvider.overrideWith((ref) async => signedInAs),
       myEnquiriesProvider.overrideWith((ref) async => enquiries),
+      hostListingsProvider.overrideWith((ref) async => hostListings),
+      hostListingProvider.overrideWith((ref, id) async => hostListings.where((l) => l.id == id).firstOrNull),
+      hostStatsProvider.overrideWith((ref) async => const {}),
+      hostEnquiriesProvider.overrideWith((ref) async => hostEnquiries),
+      hostRepositoryProvider.overrideWithValue(hostRepository ?? _FakeHostRepository()),
       isOnlineProvider.overrideWith((ref) => Stream.value(online)),
       neighbourhoodsProvider.overrideWith((ref) async => _neighbourhoods),
       amenitiesProvider.overrideWith((ref) async => const []),
