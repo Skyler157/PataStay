@@ -16,6 +16,9 @@ Widget _gate(Profile profile) => ProviderScope(
           (ref, days) async => PlatformStats({
             'period_days': days,
             'listings_by_status': {'pending_review': 3, 'published': 12},
+            'listings_pending': 3,
+            'deletion_requests': 1,
+            'deletion_oldest_requested_at': DateTime.now().subtract(const Duration(days: 25)).toIso8601String(),
             'reports_open': 2,
             'enquiries': 10,
             'enquiries_responded': 7,
@@ -23,7 +26,7 @@ Widget _gate(Profile profile) => ProviderScope(
           }),
         ),
       ],
-      child: MaterialApp(theme: AppTheme.light(), home: const AdminGate(child: DashboardScreen())),
+      child: MaterialApp(theme: AppTheme.light(), home: const AdminGate(child: Scaffold(body: DashboardScreen()))),
     );
 
 void main() {
@@ -52,7 +55,8 @@ void main() {
     await tester.pumpWidget(_gate(_profile(UserRole.admin)));
     await tester.pumpAndSettle();
     expect(find.text('Overview'), findsOneWidget);
-    expect(find.text('Listings pending review'), findsOneWidget);
+    expect(find.text('Listings to review'), findsOneWidget);
+    expect(find.text('Oldest due in 5 days'), findsOneWidget);
     expect(find.text('70%'), findsOneWidget);
     expect(find.text('KES 4,500'), findsOneWidget);
   });
