@@ -24,6 +24,12 @@ class PlatformStats {
   int get bookingsReported => _int('bookings_reported');
   int get bookingsConfirmedByBoth => _int('bookings_confirmed_by_both');
   int get reportsOpen => _int('reports_open');
+  int get listingsPending => _int('listings_pending');
+  int get deletionRequests => _int('deletion_requests');
+  DateTime? get pendingOldestSubmittedAt => _date('pending_oldest_submitted_at');
+  DateTime? get deletionOldestRequestedAt => _date('deletion_oldest_requested_at');
+
+  DateTime? _date(String key) => _json[key] == null ? null : DateTime.parse(_json[key] as String);
   num get promotionRevenueKes => (_json['promotion_revenue_kes'] as num?) ?? 0;
 
   /// Excludes development seed listings.

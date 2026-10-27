@@ -37,6 +37,8 @@ Suspended accounts (`account_status = 'suspended'`) fail `is_active_user()`. The
 | `property_status_history` | none | none | own listings (shows rejection reasons) | read all |
 | `listing_events` | via `track_listing_event()` (view/share) | same | aggregate counts via `owner_listing_stats()` | read all |
 | `promotions` | none | none | none | read; written by `admin_set_featured()` |
+| `property_locations` (exact pin) | none | none | own listings | read |
+| `account_deletions` (no personal data) | none | none | none | read; written by `admin_process_account_deletion()` |
 
 ## Listing lifecycle (server-enforced)
 
@@ -65,14 +67,22 @@ any except suspended ──archive_property()──▶ archived
 - Validation trigger: the listing must be published; the guest cannot be the host; check-in must be today or later (Nairobi time) and within 12 months; check-out must be after check-in (90 nights maximum); guest count cannot exceed capacity; the minimum stay is enforced; maximum 15 enquiries per guest per 24 hours.
 - An enquiry is never a booking. `booked` means a party *reported* an agreed stay. Admin metrics separate "reported" from "confirmed by both".
 
+## Account deletion
+
+- `request_account_deletion()` records the request and archives the user's listings at once.
+- An admin processes it with `admin_process_account_deletion()`, within the 30 days the app promises. The function refuses users who did not ask, administrator accounts (remove the role first) and the caller's own account.
+- Processing deletes the auth user. This cascades to the profile, listings, photo rows, contacts, exact pins, favourites and sessions. Enquiries the person sent stay with hosts, with the name, contact and message replaced. References in reports, events and audit tables are set to null.
+- The function returns the photo file paths. The dashboard then removes the files through the Storage API, using the admin delete policy, because SQL cannot delete storage objects.
+- `account_deletions` keeps only the user id, role, dates and counts as proof of deletion.
+
 ## Storage
 
-Bucket `property-images`: public read (for CDN caching; object names are random UUIDs), 5 MB limit, JPEG/PNG/WebP only. Upload, update and delete are allowed only under `{auth.uid()}/{property_id}/…` for a listing the caller can still edit (`storage_path_property_editable()`).
+Bucket `property-images`: public read (for CDN caching; object names are random UUIDs), 5 MB limit, JPEG/PNG/WebP only. Upload, update and delete are allowed only under `{auth.uid()}/{property_id}/…` for a listing the caller can still edit (`storage_path_property_editable()`). Admins can also list and delete objects, to clean up after account deletion.
 
 ## Tests
 
-`supabase/tests/database/001_access_control.test.sql` and `002_marketplace.test.sql` (run with `supabase test db`) cover:
-sign-up role escalation, anonymous visibility, profile and contact privacy, contact reveal requiring auth, admin RPC denial, guests editing their own role, guests creating listings, favourite and enquiry isolation, server-side enquiry validation, hosts editing status or verification, hosts editing other hosts' listings, host enquiry isolation, submission completeness, admin approval, verification prerequisites, and date-aware search (blocked nights, minimum stay, capacity).
+`supabase/tests/database/001`–`006` (run with `supabase test db`) cover:
+sign-up role escalation, anonymous visibility, profile and contact privacy, contact reveal requiring auth, admin RPC denial, guests editing their own role, guests creating listings, favourite and enquiry isolation, server-side enquiry validation, hosts editing status or verification, hosts editing other hosts' listings, host enquiry isolation, submission completeness, admin approval, verification prerequisites, date-aware search (blocked nights, minimum stay, capacity), private locations, host tools, the moderation round trip (reject reason, approve, feature, verify, suspend, reinstate) and account deletion (only on request, admin only, photos returned, enquiries anonymised, log kept).
 
 When adding a table or RPC, add matching tests before shipping.
 
