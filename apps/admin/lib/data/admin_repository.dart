@@ -54,14 +54,14 @@ class AdminRepository {
       final rows = status == PropertyStatus.pendingReview
           ? await filter.order('submitted_at', ascending: true, nullsFirst: false).limit(200)
           : await filter.order('updated_at', ascending: false).limit(200);
-      return rows.map(AdminListing.fromRow).toList();
+      return _withRisks(rows.map(AdminListing.fromRow).toList());
     });
   }
 
   Future<AdminListing?> fetchListing(String id) {
     return guard('admin.listing', () async {
       final row = await _client.from('properties').select(_listingColumns).eq('id', id).maybeSingle();
-      return row == null ? null : AdminListing.fromRow(row);
+      return row == null ? null : (await _withRisks([AdminListing.fromRow(row)])).single;
     });
   }
 
@@ -74,6 +74,20 @@ class AdminRepository {
           .order('updated_at', ascending: false);
       return rows.map(AdminListing.fromRow).toList();
     });
+  }
+
+  /// Adds warning signs from admin_listing_risks() to [listings].
+  Future<List<AdminListing>> _withRisks(List<AdminListing> listings) async {
+    if (listings.isEmpty) return listings;
+    final rows = await _client.rpc<List<dynamic>>(
+      'admin_listing_risks',
+      params: {'p_property_ids': listings.map((l) => l.id).toList()},
+    );
+    final byListing = <String, List<RiskSignal>>{};
+    for (final row in rows.cast<Map<String, dynamic>>()) {
+      (byListing[row['property_id'] as String] ??= []).add(RiskSignal.fromRow(row));
+    }
+    return [for (final l in listings) l.withRisks(byListing[l.id] ?? const [])];
   }
 
   Future<List<StatusChange>> fetchHistory(String propertyId) {
@@ -219,6 +233,82 @@ class AdminRepository {
     });
   }
 
+  // -------------------------------------------------------------------------
+  // Host follow-ups
+  // -------------------------------------------------------------------------
+
+  Future<FollowUps> fetchFollowUps() {
+    return guard('admin.followUps', () async {
+      final json = await _client.rpc<Map<String, dynamic>>('admin_followups');
+      return FollowUps.fromJson(json);
+    });
+  }
+
+  /// Records that an admin reminded a host (the message itself goes by WhatsApp).
+  Future<void> recordNudge(String propertyId, {String? enquiryId}) {
+    return guard('admin.recordNudge', () => _client.rpc<void>('admin_record_nudge', params: {
+          'p_property_id': propertyId,
+          'p_kind': enquiryId == null ? 'availability' : 'enquiry',
+          'p_enquiry_id': enquiryId,
+        }));
+  }
+
+  // -------------------------------------------------------------------------
+  // Areas and amenities (admin-only writes are enforced by RLS)
+  // -------------------------------------------------------------------------
+
+  Future<List<AdminArea>> fetchAreas() {
+    return guard('admin.areas', () async {
+      final rows = await _client
+          .from('neighbourhoods')
+          .select('id, name, slug, city, county, latitude, longitude, is_popular, is_active, sort_order, properties(count)')
+          .order('sort_order')
+          .order('name');
+      return rows.map(AdminArea.fromRow).toList();
+    });
+  }
+
+  /// Creates the area when [id] is null, otherwise updates it.
+  Future<void> saveArea(String? id, Map<String, dynamic> fields) {
+    return guard('admin.saveArea', () async {
+      if (id == null) {
+        await _client.from('neighbourhoods').insert(fields);
+      } else {
+        await _client.from('neighbourhoods').update(fields).eq('id', id);
+      }
+    });
+  }
+
+  /// Only for areas no listing uses (the database refuses otherwise).
+  Future<void> deleteArea(String id) =>
+      guard('admin.deleteArea', () => _client.from('neighbourhoods').delete().eq('id', id));
+
+  Future<List<AdminAmenity>> fetchAmenities() {
+    return guard('admin.amenities', () async {
+      final rows = await _client
+          .from('amenities')
+          .select('id, name, slug, category, icon, is_key, is_active, sort_order, property_amenities(count)')
+          .order('sort_order')
+          .order('name');
+      return rows.map(AdminAmenity.fromRow).toList();
+    });
+  }
+
+  Future<void> saveAmenity(String? id, Map<String, dynamic> fields) {
+    return guard('admin.saveAmenity', () async {
+      if (id == null) {
+        await _client.from('amenities').insert(fields);
+      } else {
+        await _client.from('amenities').update(fields).eq('id', id);
+      }
+    });
+  }
+
+  /// Removes the amenity from every listing too, so the UI only offers this
+  /// for amenities no listing uses.
+  Future<void> deleteAmenity(String id) =>
+      guard('admin.deleteAmenity', () => _client.from('amenities').delete().eq('id', id));
+
   Future<List<DeletionRecord>> fetchDeletionLog() {
     return guard('admin.deletionLog', () async {
       final rows = await _client
@@ -274,4 +364,16 @@ final adminUserProvider = FutureProvider.autoDispose.family<AdminUser?, String>(
 
 final deletionLogProvider = FutureProvider.autoDispose<List<DeletionRecord>>(
   (ref) => ref.watch(adminRepositoryProvider).fetchDeletionLog(),
+);
+
+final followUpsProvider = FutureProvider.autoDispose<FollowUps>(
+  (ref) => ref.watch(adminRepositoryProvider).fetchFollowUps(),
+);
+
+final adminAreasProvider = FutureProvider.autoDispose<List<AdminArea>>(
+  (ref) => ref.watch(adminRepositoryProvider).fetchAreas(),
+);
+
+final adminAmenitiesProvider = FutureProvider.autoDispose<List<AdminAmenity>>(
+  (ref) => ref.watch(adminRepositoryProvider).fetchAmenities(),
 );

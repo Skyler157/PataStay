@@ -6,6 +6,7 @@ import 'package:patastay_admin/core/csv.dart';
 import 'package:patastay_admin/data/admin_models.dart';
 import 'package:patastay_admin/data/admin_repository.dart';
 import 'package:patastay_admin/features/dashboard/platform_stats.dart';
+import 'package:patastay_admin/features/follow_ups/follow_ups_screen.dart';
 import 'package:patastay_core/patastay_core.dart';
 
 final _admin = Profile(id: 'a1', fullName: 'Ada Admin', email: 'ada@test.local', role: UserRole.admin, createdAt: DateTime(2026));
@@ -54,11 +55,26 @@ AdminListing _listing({String status = 'pending_review'}) => AdminListing.fromRo
     });
 
 class FakeAdminRepository extends Fake implements AdminRepository {
-  FakeAdminRepository({this.listing, this.users = const []});
+  FakeAdminRepository({this.listing, this.users = const [], this.followUps = const FollowUps(), this.areas = const []});
 
   AdminListing? listing;
   List<AdminUser> users;
+  FollowUps followUps;
+  List<AdminArea> areas;
   final calls = <String>[];
+  final saved = <Map<String, dynamic>>[];
+
+  @override
+  Future<FollowUps> fetchFollowUps() async => followUps;
+  @override
+  Future<List<AdminArea>> fetchAreas() async => areas;
+  @override
+  Future<List<AdminAmenity>> fetchAmenities() async => [];
+  @override
+  Future<void> saveArea(String? id, Map<String, dynamic> fields) async {
+    calls.add('saveArea ${id ?? 'new'}');
+    saved.add(fields);
+  }
 
   @override
   Future<List<AdminListing>> fetchListings({PropertyStatus? status, String query = ''}) async =>
@@ -99,6 +115,7 @@ class FakeAdminRepository extends Fake implements AdminRepository {
 
 Future<void> _pumpAt(WidgetTester tester, FakeAdminRepository repo, String location) async {
   final container = ProviderContainer(overrides: [
+    appConfigProvider.overrideWithValue(const AppConfig(supabaseUrl: 'http://localhost', supabasePublishableKey: 'test')),
     currentUserIdProvider.overrideWithValue(_admin.id),
     currentProfileProvider.overrideWith((ref) async => _admin),
     adminRepositoryProvider.overrideWithValue(repo),
@@ -197,6 +214,79 @@ void main() {
     await tester.tap(find.byTooltip('Open navigation menu'));
     await tester.pumpAndSettle();
     expect(find.text('Review queue'), findsOneWidget);
+  });
+
+  testWidgets('warning signs appear in the queue and on the review page', (tester) async {
+    final risky = _listing().withRisks(const [
+      RiskSignal(code: 'low_price', high: false, message: 'KES 1,500 a night is less than half the usual KES 4,200.'),
+      RiskSignal(code: 'payment_words', high: true, message: 'The text mentions paying (M-Pesa).'),
+    ]);
+    await _pumpAt(tester, FakeAdminRepository(listing: risky), '/review');
+    expect(find.text('2 warning signs'), findsOneWidget);
+
+    await tester.tap(find.text('Quiet studio off Ngong Road'));
+    await tester.pumpAndSettle();
+    expect(find.text('The text mentions paying (M-Pesa).'), findsOneWidget);
+    expect(risky.risks.first.high, isTrue, reason: 'serious signs are listed first');
+
+    await tester.tap(find.widgetWithText(FilledButton, 'Approve'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('This listing has 2 warning signs.'), findsOneWidget);
+  });
+
+  testWidgets('follow-ups list waiting guests and stale listings', (tester) async {
+    final now = DateTime.now();
+    final repo = FakeAdminRepository(
+      followUps: FollowUps(
+        unanswered: [
+          UnansweredEnquiry(
+            enquiryId: 'e1', propertyId: 'l1', listingNumber: 1042, title: 'Quiet studio', hostName: 'Hassan Host',
+            hostWhatsapp: '+254711000111', createdAt: now.subtract(const Duration(hours: 30)),
+            checkIn: now.add(const Duration(days: 5)), checkOut: now.add(const Duration(days: 7)), guestCount: 2,
+          ),
+        ],
+        stale: [
+          StaleListing(propertyId: 'l2', listingNumber: 1043, title: 'Garden flat', hostName: 'Hassan Host',
+              confirmedAt: now.subtract(const Duration(days: 20)), lastNudgedAt: now.subtract(const Duration(hours: 2))),
+        ],
+      ),
+    );
+    await _pumpAt(tester, repo, '/follow-ups');
+    expect(find.text('Enquiries waiting for a reply (1)'), findsOneWidget);
+    expect(find.text('Waiting 30 hours'), findsOneWidget);
+    expect(find.text('Last confirmed 20 days ago'), findsOneWidget);
+    expect(find.text('Remind again'), findsOneWidget); // reminded 2 hours ago
+    expect(find.text('WhatsApp host'), findsOneWidget);
+    expect(find.byType(Badge), findsWidgets); // the navigation shows the count
+  });
+
+  test('reminder messages tell the host exactly what to do', () {
+    final now = DateTime.now();
+    final message = enquiryReminder(UnansweredEnquiry(
+      enquiryId: 'e1', propertyId: 'l1', listingNumber: 1042, title: 'Quiet studio', hostName: 'Hassan Host',
+      createdAt: now.subtract(const Duration(hours: 30)), checkIn: DateTime(2026, 11, 6), checkOut: DateTime(2026, 11, 8),
+    ));
+    expect(message, startsWith('Hello Hassan, this is PataStay. A guest asked about PS-1042 "Quiet studio"'));
+    expect(message, contains('Profile > Hosting > Enquiries'));
+  });
+
+  testWidgets('an admin adds an area', (tester) async {
+    final repo = FakeAdminRepository(areas: const [AdminArea(id: 'n1', name: 'Kilimani', slug: 'kilimani', listingCount: 4)]);
+    await _pumpAt(tester, repo, '/areas');
+    expect(find.text('Kilimani'), findsOneWidget);
+
+    await tester.tap(find.text('Add area'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Save'));
+    await tester.pumpAndSettle();
+    expect(find.text('Enter the area name'), findsOneWidget);
+
+    await tester.enterText(find.widgetWithText(TextFormField, 'Name'), 'Upper Hill');
+    await tester.tap(find.text('Save'));
+    await tester.pumpAndSettle();
+    expect(repo.calls, ['saveArea new']);
+    expect(repo.saved.single['slug'], 'upper-hill');
+    expect(repo.saved.single['is_active'], isTrue);
   });
 
   test('verification needs identity, authority and a visit or video', () {

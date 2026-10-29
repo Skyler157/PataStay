@@ -381,3 +381,24 @@ String formatDateTime(DateTime d) {
   final l = d.toLocal();
   return '${Dates.day(l)}, ${l.hour.toString().padLeft(2, '0')}:${l.minute.toString().padLeft(2, '0')}';
 }
+
+/// Map tile credit (required by the tile licence) that never overflows.
+class MapCredit extends StatelessWidget {
+  const MapCredit(this.text, {super.key});
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+      alignment: Alignment.bottomRight,
+      child: Container(
+        margin: const EdgeInsets.all(Space.xs),
+        padding: const EdgeInsets.symmetric(horizontal: Space.xs, vertical: 1),
+        color: Colors.white.withValues(alpha: 0.8),
+        child: Text('© $text',
+            style: const TextStyle(fontSize: 11, color: Colors.black87), maxLines: 1, overflow: TextOverflow.ellipsis),
+      ),
+    );
+  }
+}

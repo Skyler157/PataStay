@@ -4,9 +4,11 @@ import 'package:go_router/go_router.dart';
 import 'package:patastay_core/patastay_core.dart';
 
 import '../data/admin_models.dart';
+import '../features/areas/areas_screen.dart';
 import '../features/auth/admin_gate.dart';
 import '../features/auth/admin_sign_in_screen.dart';
 import '../features/dashboard/dashboard_screen.dart';
+import '../features/follow_ups/follow_ups_screen.dart';
 import '../features/listings/listing_review_screen.dart';
 import '../features/listings/listings_screen.dart';
 import '../features/reports/reports_screen.dart';
@@ -51,6 +53,8 @@ final adminRouterProvider = Provider<GoRouter>((ref) {
             ],
           ),
           GoRoute(path: '/reports', builder: (_, _) => const ReportsScreen()),
+          GoRoute(path: '/follow-ups', builder: (_, _) => const FollowUpsScreen()),
+          GoRoute(path: '/areas', builder: (_, _) => const AreasScreen()),
           GoRoute(
             path: '/users',
             builder: (_, state) => UsersScreen(

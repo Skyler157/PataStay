@@ -206,7 +206,13 @@ class _LocationStepState extends ConsumerState<LocationStep> with _Saving {
 
   @override
   Widget build(BuildContext context) {
-    final neighbourhoods = ref.watch(neighbourhoodsProvider).value ?? const [];
+    final offered = ref.watch(neighbourhoodsProvider).value ?? const [];
+    final current = widget.listing.property.neighbourhood;
+    // An area PataStay has since hidden stays selectable for listings already in it.
+    final neighbourhoods = [
+      ...offered,
+      if (current != null && !offered.any((n) => n.id == current.id)) current,
+    ];
     final config = ref.watch(appConfigProvider);
     final hood = neighbourhoods.where((n) => n.id == _neighbourhoodId).firstOrNull;
     final centre = _pin ??

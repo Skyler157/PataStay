@@ -8,6 +8,58 @@ import '../../data/admin_repository.dart';
 import '../reports/reports_screen.dart';
 import 'listing_review_screen.dart';
 
+/// Automatic warning signs. They inform the decision; they never block it.
+class RiskPanel extends StatelessWidget {
+  const RiskPanel({super.key, required this.risks});
+
+  final List<RiskSignal> risks;
+
+  @override
+  Widget build(BuildContext context) {
+    final p = context.palette;
+    final high = risks.any((r) => r.high);
+    return Card(
+      margin: const EdgeInsets.only(bottom: Space.lg),
+      color: high ? p.dangerContainer : p.warningContainer,
+      child: Padding(
+        padding: const EdgeInsets.all(Space.lg),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+          Row(children: [
+            Icon(Icons.warning_amber_rounded, color: high ? p.danger : p.warning),
+            Gap.sm,
+            Expanded(
+              child: Text(
+                '${risks.length} warning sign${risks.length == 1 ? '' : 's'}',
+                style: context.text.titleMedium?.copyWith(color: high ? p.danger : p.warning),
+              ),
+            ),
+          ]),
+          Gap.xs,
+          Text('Look closer before approving. Call the host or ask for a video walkthrough if unsure.',
+              style: context.text.bodySmall),
+          Gap.md,
+          for (final r in risks)
+            Padding(
+              padding: const EdgeInsets.only(bottom: Space.sm),
+              child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Padding(
+                  padding: const EdgeInsets.only(top: 2),
+                  child: Tag(
+                    label: r.high ? 'High' : 'Check',
+                    foreground: r.high ? p.danger : p.warning,
+                    background: context.colors.surface,
+                  ),
+                ),
+                Gap.sm,
+                Expanded(child: Text(r.message)),
+              ]),
+            ),
+        ]),
+      ),
+    );
+  }
+}
+
 /// Status, reviewer checklist and the actions allowed in the current status.
 class ModerationPanel extends ConsumerStatefulWidget {
   const ModerationPanel({super.key, required this.listing});
@@ -42,12 +94,15 @@ class _ModerationPanelState extends ConsumerState<ModerationPanel> {
 
   Future<void> _approve() async {
     final unchecked = _checklist.length - _checked.length;
+    final risks = widget.listing.risks.length;
     final note = await askForReason(
       context,
       title: 'Approve and publish?',
-      message: unchecked > 0
-          ? 'You have not ticked $unchecked checklist item${unchecked == 1 ? '' : 's'}. The listing goes live for guests straight away.'
-          : 'The listing goes live for guests straight away.',
+      message: [
+        if (risks > 0) 'This listing has $risks warning sign${risks == 1 ? '' : 's'}.',
+        if (unchecked > 0) 'You have not ticked $unchecked checklist item${unchecked == 1 ? '' : 's'}.',
+        'The listing goes live for guests straight away.',
+      ].join(' '),
       action: 'Approve',
       optional: true,
     );
