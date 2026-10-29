@@ -13,6 +13,8 @@ class ReferenceDataRepository {
       final rows = await _client
           .from('neighbourhoods')
           .select('id, name, slug, city, county, latitude, longitude, is_popular, sort_order')
+          // Hidden areas stay readable for existing listings but are not offered.
+          .eq('is_active', true)
           .order('sort_order')
           .order('name');
       return rows.map(Neighbourhood.fromJson).toList();

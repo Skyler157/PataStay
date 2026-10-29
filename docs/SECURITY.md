@@ -26,7 +26,8 @@ Suspended accounts (`account_status = 'suspended'`) fail `is_active_user()`. The
 | Table | Anonymous | Guest (signed in) | Host | Admin |
 |---|---|---|---|---|
 | `profiles` | none | read/update own `full_name`, `phone` | same | read all; role/status via RPC |
-| `neighbourhoods`, `amenities` | read active | read active | read active | full CRUD |
+| `neighbourhoods` | read all (hidden areas stay named on existing listings; the app only offers active ones) | same | same | full CRUD |
+| `amenities` | read active | read active | read active | full CRUD |
 | `properties` | read `published` | read `published` | + read/insert/update own (not suspended/archived); delete own unpublished drafts | read all; status, verification and featuring via RPC |
 | `property_contacts` | none | via `get_property_contact()` only | own listings | read |
 | `property_images`, `property_amenities`, `property_unavailable_dates` | read if parent listing is readable | same | + write own editable listings | read |
@@ -39,6 +40,7 @@ Suspended accounts (`account_status = 'suspended'`) fail `is_active_user()`. The
 | `promotions` | none | none | none | read; written by `admin_set_featured()` |
 | `property_locations` (exact pin) | none | none | own listings | read |
 | `account_deletions` (no personal data) | none | none | none | read; written by `admin_process_account_deletion()` |
+| `host_nudges` (reminders sent to hosts) | none | none | none | read; written by `admin_record_nudge()` |
 
 ## Listing lifecycle (server-enforced)
 
@@ -66,6 +68,10 @@ any except suspended ──archive_property()──▶ archived
 - `guest_id` and `status` are forced server-side. Clients cannot set them.
 - Validation trigger: the listing must be published; the guest cannot be the host; check-in must be today or later (Nairobi time) and within 12 months; check-out must be after check-in (90 nights maximum); guest count cannot exceed capacity; the minimum stay is enforced; maximum 15 enquiries per guest per 24 hours.
 - An enquiry is never a booking. `booked` means a party *reported* an agreed stay. Admin metrics separate "reported" from "confirmed by both".
+
+## Scam warning signs
+
+`admin_listing_risks()` (admin only) flags, for reviewers: a contact number shared with another host, photos byte-identical to another host's (storage eTag), payment requests in the text (M-Pesa, paybill, deposit first), phone numbers or emails in the text, a price under half the area median for that type, a new host's first listing being a premium home, and a host with suspended or reported listings. Signs inform the decision; they never block anything automatically.
 
 ## Account deletion
 

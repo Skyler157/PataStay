@@ -167,7 +167,7 @@ Android release signing requires `apps/mobile/android/key.properties` and a keys
 | 1. Foundation: schema, RLS, auth, profiles, routing, theme, admin sign-in and stats | Done |
 | 2. Guest marketplace: home, search and filters, details, favourites, enquiries, WhatsApp/call contact, reports | Done |
 | 3. Host tools: become a host, dashboard, 9-step listing wizard with photos and map pin, manage listing (availability, blocked dates, pause), enquiries inbox, response time | Done |
-| 4. Administration: review queue, listing review with checklist, verification checks and badge, featuring, reports, users and roles, suspensions, account deletion, CSV export | Done |
+| 4. Administration: review queue, listing review with checklist, verification checks and badge, featuring, reports, users and roles, suspensions, account deletion, CSV export, scam warning signs, host follow-ups by WhatsApp, areas and amenities editor | Done |
 | 5. Quality and launch | Next |
 
 Account deletion: the app promises deletion within 30 days. Requests appear under **Users > Deletion requested** in the admin dashboard (and on the Overview), oldest first, with the days left. "Delete account and data" removes the account, listings and photos and anonymises enquiries the person sent. A log without personal data is kept in `account_deletions`.

@@ -63,6 +63,7 @@ class _Body extends StatelessWidget {
         _LocationPanel(listing: listing),
       ];
       final side = [
+        if (listing.risks.isNotEmpty) RiskPanel(risks: listing.risks),
         ModerationPanel(listing: listing),
         _HostPanel(listing: listing),
         VerificationPanel(listing: listing),
@@ -91,9 +92,10 @@ class _Body extends StatelessWidget {
               Expanded(flex: 2, child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: side)),
             ])
           else ...[
-            side.first,
+            // Warning signs and the decision come first on narrow screens.
+            ...side.take(listing.risks.isEmpty ? 1 : 2),
             ...content,
-            ...side.skip(1),
+            ...side.skip(listing.risks.isEmpty ? 1 : 2),
           ],
         ],
       );
@@ -317,7 +319,7 @@ class _LocationPanel extends ConsumerWidget {
                     child: Icon(Icons.location_on_rounded, size: 40, color: context.palette.danger),
                   ),
                 ]),
-                SimpleAttributionWidget(source: Text(config.mapAttribution)),
+                MapCredit(config.mapAttribution),
               ],
             ),
           ),

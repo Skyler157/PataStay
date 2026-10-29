@@ -172,6 +172,13 @@ class ListingRow extends StatelessWidget {
                   const Tag(label: 'Featured', foreground: PataColors.ink, background: PataColors.saffronContainer),
                 if (p.isSeed)
                   Tag(label: 'Sample', foreground: context.colors.onSurface, background: context.palette.neutralContainer),
+                if (l.risks.isNotEmpty)
+                  Tag(
+                    label: '${l.risks.length} warning sign${l.risks.length == 1 ? '' : 's'}',
+                    icon: Icons.warning_amber_rounded,
+                    foreground: l.hasHighRisk ? context.palette.danger : context.palette.warning,
+                    background: l.hasHighRisk ? context.palette.dangerContainer : context.palette.warningContainer,
+                  ),
                 if (l.reportCount > 0)
                   Tag(
                     label: '${l.reportCount} report${l.reportCount == 1 ? '' : 's'}',

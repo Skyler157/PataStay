@@ -15,13 +15,34 @@ const profileColumns =
 /// A listing as an administrator sees it: everything the host sees plus the
 /// owner and activity counts.
 class AdminListing {
-  const AdminListing({required this.listing, this.owner, this.enquiryCount = 0, this.reportCount = 0, this.featuredUntil});
+  const AdminListing({
+    required this.listing,
+    this.owner,
+    this.enquiryCount = 0,
+    this.reportCount = 0,
+    this.featuredUntil,
+    this.risks = const [],
+  });
 
   final HostListing listing;
   final Profile? owner;
   final int enquiryCount;
   final int reportCount;
   final DateTime? featuredUntil;
+
+  /// Warning signs, most serious first.
+  final List<RiskSignal> risks;
+
+  bool get hasHighRisk => risks.any((r) => r.high);
+
+  AdminListing withRisks(List<RiskSignal> risks) => AdminListing(
+        listing: listing,
+        owner: owner,
+        enquiryCount: enquiryCount,
+        reportCount: reportCount,
+        featuredUntil: featuredUntil,
+        risks: [...risks.where((r) => r.high), ...risks.where((r) => !r.high)],
+      );
 
   String get id => listing.id;
   Property get property => listing.property;
@@ -258,3 +279,201 @@ enum UserFilter {
   const UserFilter(this.label);
   final String label;
 }
+
+/// A reason to look closer at a listing (from admin_listing_risks()).
+class RiskSignal {
+  const RiskSignal({required this.code, required this.high, required this.message});
+
+  final String code;
+  final bool high;
+  final String message;
+
+  static RiskSignal fromRow(Map<String, dynamic> row) => RiskSignal(
+        code: row['code'] as String,
+        high: row['severity'] == 'high',
+        message: row['message'] as String,
+      );
+}
+
+/// A live listing whose host has not confirmed availability recently.
+class StaleListing {
+  const StaleListing({
+    required this.propertyId,
+    required this.listingNumber,
+    required this.title,
+    this.isSeed = false,
+    this.confirmedAt,
+    this.hostName,
+    this.hostWhatsapp,
+    this.lastNudgedAt,
+  });
+
+  final String propertyId;
+  final int listingNumber;
+  final String title;
+  final bool isSeed;
+  final DateTime? confirmedAt;
+  final String? hostName;
+  final String? hostWhatsapp;
+  final DateTime? lastNudgedAt;
+
+  String get reference => 'PS-$listingNumber';
+
+  static StaleListing fromRow(Map<String, dynamic> r) => StaleListing(
+        propertyId: r['property_id'] as String,
+        listingNumber: (r['listing_number'] as num).toInt(),
+        title: r['title'] as String? ?? '',
+        isSeed: r['is_seed'] as bool? ?? false,
+        confirmedAt: _date(r['confirmed_at']),
+        hostName: r['host_name'] as String?,
+        hostWhatsapp: r['host_whatsapp'] as String?,
+        lastNudgedAt: _date(r['last_nudged_at']),
+      );
+}
+
+/// An enquiry the host has not answered within a day.
+class UnansweredEnquiry {
+  const UnansweredEnquiry({
+    required this.enquiryId,
+    required this.propertyId,
+    required this.listingNumber,
+    required this.title,
+    required this.createdAt,
+    required this.checkIn,
+    required this.checkOut,
+    this.guestCount = 1,
+    this.hostName,
+    this.hostWhatsapp,
+    this.lastNudgedAt,
+  });
+
+  final String enquiryId;
+  final String propertyId;
+  final int listingNumber;
+  final String title;
+  final DateTime createdAt;
+  final DateTime checkIn;
+  final DateTime checkOut;
+  final int guestCount;
+  final String? hostName;
+  final String? hostWhatsapp;
+  final DateTime? lastNudgedAt;
+
+  String get reference => 'PS-$listingNumber';
+
+  static UnansweredEnquiry fromRow(Map<String, dynamic> r) => UnansweredEnquiry(
+        enquiryId: r['enquiry_id'] as String,
+        propertyId: r['property_id'] as String,
+        listingNumber: (r['listing_number'] as num).toInt(),
+        title: r['title'] as String? ?? '',
+        createdAt: DateTime.parse(r['created_at'] as String),
+        checkIn: DateTime.parse(r['check_in'] as String),
+        checkOut: DateTime.parse(r['check_out'] as String),
+        guestCount: (r['guest_count'] as num?)?.toInt() ?? 1,
+        hostName: r['host_name'] as String?,
+        hostWhatsapp: r['host_whatsapp'] as String?,
+        lastNudgedAt: _date(r['last_nudged_at']),
+      );
+}
+
+class FollowUps {
+  const FollowUps({this.stale = const [], this.unanswered = const []});
+
+  final List<StaleListing> stale;
+  final List<UnansweredEnquiry> unanswered;
+
+  int get total => stale.length + unanswered.length;
+
+  static FollowUps fromJson(Map<String, dynamic> json) => FollowUps(
+        stale: ((json['stale'] as List?) ?? const []).cast<Map<String, dynamic>>().map(StaleListing.fromRow).toList(),
+        unanswered: ((json['unanswered'] as List?) ?? const [])
+            .cast<Map<String, dynamic>>()
+            .map(UnansweredEnquiry.fromRow)
+            .toList(),
+      );
+}
+
+/// A neighbourhood as admins manage it, including hidden ones.
+class AdminArea {
+  const AdminArea({
+    required this.id,
+    required this.name,
+    required this.slug,
+    this.city = 'Nairobi',
+    this.county,
+    this.latitude,
+    this.longitude,
+    this.isPopular = false,
+    this.isActive = true,
+    this.sortOrder = 0,
+    this.listingCount = 0,
+  });
+
+  final String id;
+  final String name;
+  final String slug;
+  final String city;
+  final String? county;
+  final double? latitude;
+  final double? longitude;
+  final bool isPopular;
+  final bool isActive;
+  final int sortOrder;
+  final int listingCount;
+
+  static AdminArea fromRow(Map<String, dynamic> r) => AdminArea(
+        id: r['id'] as String,
+        name: r['name'] as String,
+        slug: r['slug'] as String,
+        city: r['city'] as String? ?? 'Nairobi',
+        county: r['county'] as String?,
+        latitude: (r['latitude'] as num?)?.toDouble(),
+        longitude: (r['longitude'] as num?)?.toDouble(),
+        isPopular: r['is_popular'] as bool? ?? false,
+        isActive: r['is_active'] as bool? ?? true,
+        sortOrder: (r['sort_order'] as num?)?.toInt() ?? 0,
+        listingCount: _count(r['properties']),
+      );
+}
+
+class AdminAmenity {
+  const AdminAmenity({
+    required this.id,
+    required this.name,
+    required this.slug,
+    this.category = 'general',
+    this.icon,
+    this.isKey = false,
+    this.isActive = true,
+    this.sortOrder = 0,
+    this.listingCount = 0,
+  });
+
+  final String id;
+  final String name;
+  final String slug;
+  final String category;
+  final String? icon;
+  final bool isKey;
+  final bool isActive;
+  final int sortOrder;
+  final int listingCount;
+
+  static const categories = ['essentials', 'comfort', 'building', 'safety', 'services', 'policies', 'general'];
+
+  static AdminAmenity fromRow(Map<String, dynamic> r) => AdminAmenity(
+        id: r['id'] as String,
+        name: r['name'] as String,
+        slug: r['slug'] as String,
+        category: r['category'] as String? ?? 'general',
+        icon: r['icon'] as String?,
+        isKey: r['is_key'] as bool? ?? false,
+        isActive: r['is_active'] as bool? ?? true,
+        sortOrder: (r['sort_order'] as num?)?.toInt() ?? 0,
+        listingCount: _count(r['property_amenities']),
+      );
+}
+
+/// "Upper Hill" -> "upper-hill".
+String slugify(String name) =>
+    name.toLowerCase().trim().replaceAll(RegExp(r'[^a-z0-9]+'), '-').replaceAll(RegExp(r'^-+|-+$'), '');

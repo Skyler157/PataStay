@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:patastay_core/patastay_core.dart';
 
+import '../data/admin_repository.dart';
 import '../features/dashboard/platform_stats.dart';
 
 class _Destination {
@@ -18,7 +19,9 @@ const _destinations = [
   _Destination('/review', 'Review queue', Icons.fact_check_outlined, Icons.fact_check_rounded),
   _Destination('/listings', 'Listings', Icons.home_work_outlined, Icons.home_work_rounded),
   _Destination('/reports', 'Reports', Icons.flag_outlined, Icons.flag_rounded),
+  _Destination('/follow-ups', 'Follow-ups', Icons.notifications_active_outlined, Icons.notifications_active_rounded),
   _Destination('/users', 'Users', Icons.people_outline_rounded, Icons.people_rounded),
+  _Destination('/areas', 'Areas & amenities', Icons.map_outlined, Icons.map_rounded),
 ];
 
 /// Side navigation on wide screens, a drawer on narrow ones.
@@ -40,10 +43,12 @@ class AdminShell extends ConsumerWidget {
     final wide = MediaQuery.sizeOf(context).width >= 900;
     final profile = ref.watch(currentProfileProvider).value;
     final stats = ref.watch(platformStatsProvider(30)).value;
-    int? badgeFor(int i) => switch (i) {
-          1 => stats?.listingsPending,
-          3 => stats?.reportsOpen,
-          4 => stats?.deletionRequests,
+    final followUps = ref.watch(followUpsProvider).value;
+    int? badgeFor(int i) => switch (_destinations[i].path) {
+          '/review' => stats?.listingsPending,
+          '/reports' => stats?.reportsOpen,
+          '/follow-ups' => followUps?.total,
+          '/users' => stats?.deletionRequests,
           _ => null,
         };
 
@@ -56,7 +61,9 @@ class AdminShell extends ConsumerWidget {
 
     void go(int i) {
       // Badges follow the latest numbers after moderation work.
-      ref.invalidate(platformStatsProvider(30));
+      ref
+        ..invalidate(platformStatsProvider(30))
+        ..invalidate(followUpsProvider);
       context.go(_destinations[i].path);
     }
 
@@ -97,7 +104,7 @@ class AdminShell extends ConsumerWidget {
               NavigationDrawerDestination(
                 icon: icon(i),
                 selectedIcon: icon(i, selected: true),
-                label: Text(_destinations[i].label),
+                label: Flexible(child: Text(_destinations[i].label, overflow: TextOverflow.ellipsis)),
               ),
           ],
         ),
