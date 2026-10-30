@@ -1,6 +1,6 @@
 {
-    "name": "patastay_admin",
-    "short_name": "patastay_admin",
+    "name": "PataStay Admin",
+    "short_name": "PataStay Admin",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
