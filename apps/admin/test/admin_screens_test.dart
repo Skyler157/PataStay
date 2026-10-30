@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:patastay_admin/app/admin_app.dart';
+import 'package:patastay_admin/app/theme_mode.dart';
 import 'package:patastay_admin/core/csv.dart';
 import 'package:patastay_admin/data/admin_models.dart';
 import 'package:patastay_admin/data/admin_repository.dart';
 import 'package:patastay_admin/features/dashboard/platform_stats.dart';
 import 'package:patastay_admin/features/follow_ups/follow_ups_screen.dart';
 import 'package:patastay_core/patastay_core.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 final _admin = Profile(id: 'a1', fullName: 'Ada Admin', email: 'ada@test.local', role: UserRole.admin, createdAt: DateTime(2026));
 
@@ -113,8 +115,10 @@ class FakeAdminRepository extends Fake implements AdminRepository {
   }
 }
 
-Future<void> _pumpAt(WidgetTester tester, FakeAdminRepository repo, String location) async {
+Future<void> _pumpAt(WidgetTester tester, FakeAdminRepository repo, String location,
+    {SharedPreferences? preferences}) async {
   final container = ProviderContainer(overrides: [
+    adminPreferencesProvider.overrideWithValue(preferences),
     appConfigProvider.overrideWithValue(const AppConfig(supabaseUrl: 'http://localhost', supabasePublishableKey: 'test')),
     currentUserIdProvider.overrideWithValue(_admin.id),
     currentProfileProvider.overrideWith((ref) async => _admin),
@@ -287,6 +291,22 @@ void main() {
     expect(repo.calls, ['saveArea new']);
     expect(repo.saved.single['slug'], 'upper-hill');
     expect(repo.saved.single['is_active'], isTrue);
+  });
+
+  testWidgets('the appearance menu switches to dark mode and remembers it', (tester) async {
+    SharedPreferences.setMockInitialValues({});
+    final preferences = await SharedPreferences.getInstance();
+    await _pumpAt(tester, FakeAdminRepository(listing: _listing()), '/', preferences: preferences);
+    Brightness brightness() => Theme.of(tester.element(find.text('Overview').first)).brightness;
+    expect(brightness(), Brightness.light);
+
+    await tester.tap(find.byTooltip('Appearance'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Dark'));
+    await tester.pumpAndSettle();
+
+    expect(brightness(), Brightness.dark);
+    expect(preferences.getString('admin_theme_mode'), 'dark');
   });
 
   test('verification needs identity, authority and a visit or video', () {

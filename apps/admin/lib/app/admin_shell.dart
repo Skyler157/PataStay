@@ -5,6 +5,7 @@ import 'package:patastay_core/patastay_core.dart';
 
 import '../data/admin_repository.dart';
 import '../features/dashboard/platform_stats.dart';
+import 'theme_mode.dart';
 
 class _Destination {
   const _Destination(this.path, this.label, this.icon, this.selectedIcon);
@@ -80,6 +81,7 @@ class AdminShell extends ConsumerWidget {
             padding: const EdgeInsets.only(right: Space.sm),
             child: Center(child: Text(profile.email ?? '', style: context.text.bodyMedium)),
           ),
+        const ThemeModeButton(),
         IconButton(
           tooltip: 'Sign out',
           onPressed: () => ref.read(authRepositoryProvider).signOut(),

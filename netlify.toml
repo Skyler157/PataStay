@@ -1,0 +1,16 @@
+# Netlify builds the admin dashboard from GitHub on every push to main.
+# Supabase settings come from the site's environment variables (Netlify →
+# Site configuration → Environment variables), not from this repository.
+[build]
+  command = "bash tools/netlify-build.sh"
+  publish = "apps/admin/build/web"
+  # Skip the build when nothing the admin site uses has changed.
+  ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF -- apps/admin packages/patastay_core pubspec.yaml pubspec.lock netlify.toml tools/netlify-build.sh"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    X-Robots-Tag = "noindex, nofollow"

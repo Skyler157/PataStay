@@ -143,10 +143,18 @@ cd apps/mobile
 flutter build appbundle --release --dart-define-from-file=../../env/prod.json   # Google Play
 flutter build apk --release --dart-define-from-file=../../env/prod.json         # sideload/testing
 cd ../admin
-flutter build web --release --dart-define-from-file=../../env/prod.json         # deploy build/web to any static host
+flutter build web --release --dart-define-from-file=../../env/admin.prod.json   # manual build of the admin site
 ```
 
 Android release signing requires `apps/mobile/android/key.properties` and a keystore. Neither is ever committed.
+
+## Admin site on Netlify
+
+The admin dashboard (https://patastay.netlify.app) deploys from GitHub. Every push to `main` that touches `apps/admin`, `packages/patastay_core` or the workspace files triggers a build ([netlify.toml](netlify.toml), [tools/netlify-build.sh](tools/netlify-build.sh)). The build downloads Flutter, so it takes a few minutes and uses Netlify build minutes (300 a month on the free plan).
+
+Set these in Netlify under Site configuration > Environment variables: `SUPABASE_URL` and `SUPABASE_PUBLISHABLE_KEY` (publishable key only, never the secret key). Optional: `SHOW_SAMPLE_LABELS`.
+
+The admin site uses OpenStreetMap tiles. The MapTiler key stays restricted to the mobile app: MapTiler requires a request to match every restriction on a key, and the free plan allows only one key.
 
 ## Hosted Supabase setup (staging/production)
 
