@@ -15,6 +15,7 @@ import '../features/reports/reports_screen.dart';
 import '../features/users/user_detail_screen.dart';
 import '../features/users/users_screen.dart';
 import 'admin_shell.dart';
+import 'theme_mode.dart';
 
 final adminRouterProvider = Provider<GoRouter>((ref) {
   final refresh = _RouterRefresh();
@@ -87,6 +88,7 @@ class AdminApp extends ConsumerWidget {
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light(),
       darkTheme: AppTheme.dark(),
+      themeMode: ref.watch(adminThemeModeProvider),
       routerConfig: ref.watch(adminRouterProvider),
     );
   }
