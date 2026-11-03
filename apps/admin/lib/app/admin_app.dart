@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:patastay_core/patastay_core.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' show AuthChangeEvent;
 
 import '../data/admin_models.dart';
 import '../features/areas/areas_screen.dart';
 import '../features/auth/admin_gate.dart';
 import '../features/auth/admin_sign_in_screen.dart';
+import '../features/auth/set_password_screen.dart';
 import '../features/dashboard/dashboard_screen.dart';
 import '../features/follow_ups/follow_ups_screen.dart';
 import '../features/listings/listing_review_screen.dart';
@@ -33,6 +35,7 @@ final adminRouterProvider = Provider<GoRouter>((ref) {
     },
     routes: [
       GoRoute(path: '/sign-in', builder: (_, _) => const AdminSignInScreen()),
+      GoRoute(path: '/set-password', builder: (_, _) => const SetPasswordScreen()),
       // Every admin page is wrapped in AdminGate (UI check). The database
       // enforces admin rights independently on every query and RPC.
       ShellRoute(
@@ -71,6 +74,11 @@ final adminRouterProvider = Provider<GoRouter>((ref) {
       ),
     ],
   );
+  // Password-reset links open the site with a recovery session.
+  ref.listen(authStateChangesProvider, (_, next) {
+    if (next.value?.event == AuthChangeEvent.passwordRecovery) router.go('/set-password');
+  });
+
   ref.onDispose(() {
     router.dispose();
     refresh.dispose();

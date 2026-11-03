@@ -7,6 +7,7 @@ import '../../../core/routing/routes.dart';
 import '../../../core/storage/local_preferences.dart';
 import '../../host/application/host_providers.dart';
 import '../../../core/widgets/form_widgets.dart';
+import '../../../core/widgets/legal_links.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -54,6 +55,8 @@ class _SignedOutView extends StatelessWidget {
           FilledButton(onPressed: () => context.push(Routes.signIn), child: const Text('Sign in')),
           Gap.md,
           OutlinedButton(onPressed: () => context.push(Routes.register), child: const Text('Create an account')),
+          Gap.lg,
+          const LegalLinksRow(),
         ],
       ),
     );
@@ -200,6 +203,19 @@ class _ProfileView extends ConsumerWidget {
             leading: const Icon(Icons.logout_rounded),
             title: const Text('Sign out'),
             onTap: () => _signOut(context, ref),
+          ),
+          const Divider(),
+          ListTile(
+            leading: const Icon(Icons.privacy_tip_outlined),
+            title: const Text('Privacy policy'),
+            trailing: const Icon(Icons.open_in_new_rounded, size: 20),
+            onTap: () => openLegalPage(context, LegalLinks.privacy),
+          ),
+          ListTile(
+            leading: const Icon(Icons.description_outlined),
+            title: const Text('Terms of use'),
+            trailing: const Icon(Icons.open_in_new_rounded, size: 20),
+            onTap: () => openLegalPage(context, LegalLinks.terms),
           ),
           const Divider(),
           ListTile(

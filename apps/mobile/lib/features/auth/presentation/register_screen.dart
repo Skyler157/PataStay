@@ -5,6 +5,7 @@ import 'package:patastay_core/patastay_core.dart';
 
 import '../../../core/routing/routes.dart';
 import '../../../core/widgets/form_widgets.dart';
+import '../../../core/widgets/legal_links.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({super.key});
@@ -142,7 +143,14 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         ),
         Gap.xl,
         BusyButton(label: 'Create account', busy: _busy, onPressed: _submit),
-        Gap.lg,
+        Gap.sm,
+        Text(
+          'By creating an account, you agree to our Terms of use and Privacy policy.',
+          textAlign: TextAlign.center,
+          style: context.text.bodySmall?.copyWith(color: context.palette.mutedText),
+        ),
+        const LegalLinksRow(),
+        Gap.sm,
         Wrap(
           alignment: WrapAlignment.center,
           crossAxisAlignment: WrapCrossAlignment.center,

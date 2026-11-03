@@ -26,4 +26,5 @@ export 'src/utils/phone_numbers.dart';
 export 'src/utils/validators.dart';
 export 'src/widgets/configuration_error_app.dart';
 export 'src/widgets/pata_wordmark.dart';
+export 'src/widgets/password_field.dart';
 export 'src/widgets/state_views.dart';
