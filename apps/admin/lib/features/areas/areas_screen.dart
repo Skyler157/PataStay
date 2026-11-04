@@ -81,7 +81,8 @@ class _AreaList extends ConsumerWidget {
                 ]),
                 subtitle: Text([
                   '${value[i].listingCount} listing${value[i].listingCount == 1 ? '' : 's'}',
-                  value[i].county ?? value[i].city,
+                  [value[i].city, if (value[i].county != null && value[i].county != value[i].city) '${value[i].county} County']
+                      .join(', '),
                   if (value[i].latitude == null) 'no map location',
                 ].join(' · ')),
                 trailing: const Icon(Icons.edit_outlined),
@@ -202,6 +203,7 @@ class _AreaDialog extends ConsumerStatefulWidget {
 
 class _AreaDialogState extends ConsumerState<_AreaDialog> with _EditorDialog {
   late final _name = TextEditingController(text: widget.area?.name);
+  late final _city = TextEditingController(text: widget.area?.city ?? 'Nairobi');
   late final _county = TextEditingController(text: widget.area?.county ?? 'Nairobi');
   late final _sort = TextEditingController(text: '${widget.area?.sortOrder ?? 100}');
   late bool _popular = widget.area?.isPopular ?? false;
@@ -214,6 +216,7 @@ class _AreaDialogState extends ConsumerState<_AreaDialog> with _EditorDialog {
   @override
   void dispose() {
     _name.dispose();
+    _city.dispose();
     _county.dispose();
     _sort.dispose();
     super.dispose();
@@ -223,6 +226,7 @@ class _AreaDialogState extends ConsumerState<_AreaDialog> with _EditorDialog {
         'name': _name.text.trim(),
         // The slug is fixed once created: the app links areas by it.
         if (widget.area == null) 'slug': slugify(_name.text),
+        'city': _city.text.trim().isEmpty ? 'Nairobi' : _city.text.trim(),
         'county': _county.text.trim().isEmpty ? null : _county.text.trim(),
         'latitude': _pin == null ? null : double.parse(_pin!.latitude.toStringAsFixed(6)),
         'longitude': _pin == null ? null : double.parse(_pin!.longitude.toStringAsFixed(6)),
@@ -251,7 +255,23 @@ class _AreaDialogState extends ConsumerState<_AreaDialog> with _EditorDialog {
                 decoration: const InputDecoration(labelText: 'Name', hintText: 'For example: Syokimau'),
                 validator: (v) => (v ?? '').trim().length < 2 ? 'Enter the area name' : null,
               ),
-              TextFormField(controller: _county, maxLength: 60, decoration: const InputDecoration(labelText: 'County')),
+              Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Expanded(
+                  child: TextFormField(
+                    controller: _city,
+                    maxLength: 60,
+                    decoration: const InputDecoration(
+                      labelText: 'Town or city',
+                      helperText: 'The app groups areas by this',
+                    ),
+                  ),
+                ),
+                Gap.md,
+                Expanded(
+                  child: TextFormField(
+                      controller: _county, maxLength: 60, decoration: const InputDecoration(labelText: 'County')),
+                ),
+              ]),
               Gap.sm,
               Text('Map location', style: context.text.labelLarge),
               Text('Click the map at the centre of the area. "Near me" search and the area map use it.',

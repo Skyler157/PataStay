@@ -83,7 +83,10 @@ MapTiler, Stadia Maps and Mapbox all offer free or low-cost tiers. No code chang
 ## Running
 
 ```powershell
-# Admin dashboard (Chrome). Port 5050 is in the allowed auth redirect URLs.
+# Admin dashboard (Chrome, http://localhost:5050), from the repository root:
+#   .\admin          local database (starts Supabase; Docker Desktop must be running)
+#   .\admin -Live    live database (real data)
+# Or by hand:
 cd apps/admin
 flutter run -d chrome --web-port 5050 --dart-define-from-file=../../env/dev.json
 # If `flutter run -d chrome` fails, build once and serve the files instead:

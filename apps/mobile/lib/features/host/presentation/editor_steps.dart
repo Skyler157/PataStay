@@ -6,8 +6,10 @@ import 'package:latlong2/latlong.dart';
 import 'package:patastay_core/patastay_core.dart';
 
 import '../../../core/location/location_service.dart';
+import '../../../core/widgets/area_picker.dart';
 import '../../../core/widgets/form_widgets.dart';
 import 'listing_editor_screen.dart';
+import 'pin_map_screen.dart';
 
 typedef StepSaved = void Function();
 
@@ -239,16 +241,30 @@ class _LocationStepState extends ConsumerState<LocationStep> with _Saving {
         }, widget.onSaved);
       },
       children: [
-        DropdownButtonFormField<String>(
-          initialValue: _neighbourhoodId,
-          isExpanded: true,
-          decoration: const InputDecoration(labelText: 'Neighbourhood'),
-          items: [for (final n in neighbourhoods) DropdownMenuItem(value: n.id, child: Text(n.name))],
-          onChanged: (id) {
+        InkWell(
+          borderRadius: BorderRadius.circular(Radii.md),
+          onTap: () async {
+            final chosen = await showAreaPicker(
+              context,
+              areas: neighbourhoods,
+              selected: {?_neighbourhoodId},
+            );
+            if (chosen == null || chosen.isEmpty || !mounted) return;
+            final id = chosen.first;
             setState(() => _neighbourhoodId = id);
             final n = neighbourhoods.where((x) => x.id == id).firstOrNull;
             if (_pin == null && n?.latitude != null) _map.move(LatLng(n!.latitude!, n.longitude!), 15);
           },
+          child: InputDecorator(
+            decoration: const InputDecoration(
+              labelText: 'Neighbourhood',
+              suffixIcon: Icon(Icons.arrow_drop_down_rounded),
+            ),
+            isEmpty: hood == null,
+            child: hood == null
+                ? null
+                : Text(hood.city == hood.name || hood.city == 'Nairobi' ? hood.name : '${hood.name}, ${hood.city}'),
+          ),
         ),
         Gap.lg,
         TextFormField(
@@ -262,7 +278,10 @@ class _LocationStepState extends ConsumerState<LocationStep> with _Saving {
         ),
         Gap.lg,
         Text('Pin on the map (private)', style: context.text.titleSmall),
-        Text(_pin == null ? 'Tap the map where the building is.' : 'Pin set. Tap elsewhere to move it.',
+        Text(
+            _pin == null
+                ? 'Tap the map where the building is, or expand it to full screen.'
+                : 'Pin set. Tap elsewhere to move it.',
             style: context.text.bodySmall),
         Align(
           alignment: AlignmentDirectional.centerStart,
@@ -278,32 +297,48 @@ class _LocationStepState extends ConsumerState<LocationStep> with _Saving {
             borderRadius: BorderRadius.circular(Radii.md),
             child: SizedBox(
               height: 300,
-              child: FlutterMap(
-                mapController: _map,
-                options: MapOptions(
-                  initialCenter: centre,
-                  initialZoom: _pin == null ? 14 : 16,
-                  onTap: (_, point) => setState(() => _pin = point),
-                  interactionOptions: const InteractionOptions(flags: InteractiveFlag.all & ~InteractiveFlag.rotate),
-                ),
-                children: [
-                  TileLayer(urlTemplate: config.mapTileUrl, userAgentPackageName: 'com.patastay.app'),
-                  if (_pin != null)
-                    MarkerLayer(markers: [
-                      Marker(
-                        point: _pin!,
-                        width: 40,
-                        height: 40,
-                        alignment: Alignment.topCenter,
-                        child: Icon(Icons.location_on_rounded, size: 40, color: context.colors.primary),
-                      ),
-                    ]),
-                  RichAttributionWidget(
-                    showFlutterMapAttribution: false,
-                    attributions: [TextSourceAttribution(config.mapAttribution)],
+              child: Stack(children: [
+                FlutterMap(
+                  mapController: _map,
+                  options: MapOptions(
+                    initialCenter: centre,
+                    initialZoom: _pin == null ? 14 : 16,
+                    onTap: (_, point) => setState(() => _pin = point),
+                    interactionOptions: const InteractionOptions(flags: InteractiveFlag.all & ~InteractiveFlag.rotate),
                   ),
-                ],
-              ),
+                  children: [
+                    TileLayer(urlTemplate: config.mapTileUrl, userAgentPackageName: 'com.patastay.app'),
+                    if (_pin != null)
+                      MarkerLayer(markers: [
+                        Marker(
+                          point: _pin!,
+                          width: 40,
+                          height: 40,
+                          alignment: Alignment.topCenter,
+                          child: Icon(Icons.location_on_rounded, size: 40, color: context.colors.primary),
+                        ),
+                      ]),
+                    RichAttributionWidget(
+                      showFlutterMapAttribution: false,
+                      attributions: [TextSourceAttribution(config.mapAttribution)],
+                    ),
+                  ],
+                ),
+                Positioned(
+                  top: Space.sm,
+                  right: Space.sm,
+                  child: IconButton.filledTonal(
+                    tooltip: 'Expand map',
+                    icon: const Icon(Icons.open_in_full_rounded),
+                    onPressed: () async {
+                      final point = await openPinMap(context, centre: centre, pin: _pin);
+                      if (point == null || !mounted) return;
+                      setState(() => _pin = point);
+                      _map.move(point, 16);
+                    },
+                  ),
+                ),
+              ]),
             ),
           ),
       ],
@@ -365,7 +400,7 @@ class _RoomsStepState extends ConsumerState<RoomsStep> with _Saving {
       ),
       children: [
         _counter('Bedrooms', _bedrooms == 0 ? 'Studio' : '$_bedrooms',
-            hint: '0 means a studio or bedsitter',
+            hint: '0 means a studio',
             onMinus: _bedrooms > 0 ? () => setState(() => _bedrooms--) : null,
             onPlus: _bedrooms < 20 ? () => setState(() => _bedrooms++) : null),
         _counter('Bathrooms', bath(_bathrooms),
@@ -771,6 +806,10 @@ class ReviewStep extends ConsumerStatefulWidget {
 }
 
 class _ReviewStepState extends ConsumerState<ReviewStep> with _Saving {
+  /// Submitting also confirms availability, so a newly approved listing does
+  /// not show guests "Host has not confirmed availability".
+  bool _availableNow = false;
+
   @override
   Widget build(BuildContext context) {
     final l = widget.listing;
@@ -786,10 +825,14 @@ class _ReviewStepState extends ConsumerState<ReviewStep> with _Saving {
       _ when submittable => (
           'Everything is ready. Our team checks every listing before guests can see it, usually within a day or two.',
           'Submit for review',
-          () => save(() async {
-                await ref.read(hostRepositoryProvider).submitForReview(l.id);
-                if (mounted) this.context.showMessage('Submitted for review. We will let you know when it is live.');
-              }, widget.onDone),
+          _availableNow
+              ? () => save(() async {
+                    final repo = ref.read(hostRepositoryProvider);
+                    await repo.confirmAvailability(l.id);
+                    await repo.submitForReview(l.id);
+                    if (mounted) this.context.showMessage('Submitted for review. We will let you know when it is live.');
+                  }, widget.onDone)
+              : null,
         ),
       PropertyStatus.pendingReview => ('Your listing is in review. Your changes are saved.', 'Done', widget.onDone),
       _ => ('Your changes are saved and live for guests.', 'Done', widget.onDone),
@@ -834,6 +877,21 @@ class _ReviewStepState extends ConsumerState<ReviewStep> with _Saving {
         if (l.status == PropertyStatus.rejected && l.rejectionReason != null) ...[
           Gap.lg,
           InfoBanner(tone: BannerTone.danger, title: 'Reviewer\'s note', message: l.rejectionReason!),
+        ],
+        if (submittable && missing.isEmpty) ...[
+          Gap.lg,
+          Card(
+            child: CheckboxListTile(
+              value: _availableNow,
+              onChanged: (v) => setState(() => _availableNow = v ?? false),
+              controlAffinity: ListTileControlAffinity.leading,
+              title: const Text('The place is available for guests now'),
+              subtitle: const Text(
+                'Guests will see that you confirmed availability. If some dates are already taken, '
+                'block them in your listing after submitting.',
+              ),
+            ),
+          ),
         ],
         Gap.lg,
         Text(

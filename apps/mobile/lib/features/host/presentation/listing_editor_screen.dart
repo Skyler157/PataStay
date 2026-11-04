@@ -108,7 +108,15 @@ class _ListingEditorScreenState extends ConsumerState<ListingEditorScreen> {
       },
       child: Scaffold(
         appBar: AppBar(
-          leading: IconButton(tooltip: 'Save and close', icon: const Icon(Icons.close_rounded), onPressed: _close),
+          // Back goes one step; the current step's unsaved changes are dropped
+          // (each step saves when the host taps Continue).
+          leading: _index == 0
+              ? IconButton(tooltip: 'Close', icon: const Icon(Icons.close_rounded), onPressed: _close)
+              : IconButton(
+                  tooltip: 'Previous step',
+                  icon: const Icon(Icons.arrow_back_rounded),
+                  onPressed: () => setState(() => _index--),
+                ),
           title: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Text(_step.title),
             Text('Step ${_index + 1} of ${EditorStep.values.length} · saved as you go', style: context.text.bodySmall),
@@ -116,6 +124,7 @@ class _ListingEditorScreenState extends ConsumerState<ListingEditorScreen> {
           actions: [
             if (current != null)
               IconButton(tooltip: 'All steps', icon: const Icon(Icons.list_rounded), onPressed: () => _openStepMenu(current)),
+            if (_index > 0) IconButton(tooltip: 'Close', icon: const Icon(Icons.close_rounded), onPressed: _close),
           ],
           bottom: PreferredSize(
             preferredSize: const Size.fromHeight(4),

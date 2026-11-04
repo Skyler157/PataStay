@@ -26,15 +26,25 @@ class _PhotosStepState extends ConsumerState<PhotosStep> {
   final _picker = ImagePicker();
   int _uploading = 0;
   int _lowResolution = 0;
-  bool _reordering = false;
+
+  /// Photo ids in the order the host last chose, until the server shows it.
+  List<String>? _pendingOrder;
 
   static const _maxPhotos = 20;
 
   @override
   void didUpdateWidget(covariant PhotosStep old) {
     super.didUpdateWidget(old);
-    // Keep the server's latest list once uploads have finished.
-    if (_uploading == 0 && !_reordering) _photos = [...widget.listing.property.images];
+    // Keep the server's latest list once uploads have finished, but not an
+    // older copy that predates the host's latest reorder.
+    if (_uploading > 0) return;
+    final server = widget.listing.property.images;
+    final pending = _pendingOrder;
+    if (pending != null) {
+      if (!listEquals([for (final p in server) p.id], pending)) return;
+      _pendingOrder = null;
+    }
+    _photos = [...server];
   }
 
   Future<void> _add({required bool camera}) async {
@@ -135,118 +145,127 @@ class _PhotosStepState extends ConsumerState<PhotosStep> {
     next.insert(newIndex, next.removeAt(oldIndex));
     setState(() {
       _photos = next;
-      _reordering = true;
+      _pendingOrder = [for (final p in next) p.id!];
     });
     try {
       await _saveOrder(next);
       refreshHostData(ref, listingId: widget.listing.id);
     } on AppFailure catch (failure) {
       if (mounted) {
-        setState(() => _photos = before);
+        setState(() {
+          _photos = before;
+          _pendingOrder = null;
+        });
         context.showFailure(failure);
       }
-    } finally {
-      if (mounted) setState(() => _reordering = false);
     }
   }
+
+  void _makeCover(int index) => _reorder(index, 0);
 
   @override
   Widget build(BuildContext context) {
     final needed = HostListing.minimumPhotos - _photos.length;
+    final header = Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      Text(
+        'Add at least ${HostListing.minimumPhotos} real photos of this place: the living area, bedroom, kitchen and bathroom. '
+        'Press and hold a photo, or drag its handle, to reorder. The first photo is the cover.',
+        style: context.text.bodyLarge?.copyWith(color: context.palette.mutedText),
+      ),
+      Gap.md,
+      const InfoBanner(
+        message: 'Only use photos of this exact place that you took or are allowed to use. '
+            'Copied photos are a common scam sign and get listings rejected.',
+      ),
+      Gap.lg,
+      Wrap(spacing: Space.sm, runSpacing: Space.sm, children: [
+        FilledButton.tonalIcon(
+          onPressed: _uploading > 0 ? null : () => _add(camera: false),
+          icon: const Icon(Icons.photo_library_outlined),
+          label: const Text('Add from gallery'),
+        ),
+        if (!kIsWeb)
+          OutlinedButton.icon(
+            onPressed: _uploading > 0 ? null : () => _add(camera: true),
+            icon: const Icon(Icons.photo_camera_outlined),
+            label: const Text('Take a photo'),
+          ),
+      ]),
+      if (_uploading > 0) ...[
+        Gap.md,
+        Row(children: [
+          const SizedBox.square(dimension: 18, child: CircularProgressIndicator(strokeWidth: 2.5)),
+          Gap.sm,
+          Text('Preparing and uploading $_uploading photo${_uploading == 1 ? '' : 's'}…', style: context.text.bodyMedium),
+        ]),
+      ],
+      Gap.lg,
+      Text(
+        needed > 0
+            ? '${_photos.length} added · add $needed more'
+            : '${_photos.length} photo${_photos.length == 1 ? '' : 's'} · up to $_maxPhotos',
+        style: context.text.titleSmall,
+      ),
+      Gap.sm,
+      if (_photos.isEmpty)
+        Container(
+          height: 120,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            border: Border.all(color: context.colors.outlineVariant),
+            borderRadius: BorderRadius.circular(Radii.md),
+          ),
+          child: Text('No photos yet', style: context.text.bodyMedium),
+        ),
+    ]);
+
     return Column(children: [
       Expanded(
-        child: ListView(
+        child: ReorderableListView.builder(
           padding: const EdgeInsets.fromLTRB(Space.gutter, Space.lg, Space.gutter, Space.xxl),
-          children: [
-            Text(
-              'Add at least ${HostListing.minimumPhotos} real photos of this place: the living area, bedroom, kitchen and bathroom. '
-              'Drag to reorder; the first photo is the cover.',
-              style: context.text.bodyLarge?.copyWith(color: context.palette.mutedText),
-            ),
-            Gap.md,
-            const InfoBanner(
-              message: 'Only use photos of this exact place that you took or are allowed to use. '
-                  'Copied photos are a common scam sign and get listings rejected.',
-            ),
-            Gap.lg,
-            Wrap(spacing: Space.sm, runSpacing: Space.sm, children: [
-              FilledButton.tonalIcon(
-                onPressed: _uploading > 0 ? null : () => _add(camera: false),
-                icon: const Icon(Icons.photo_library_outlined),
-                label: const Text('Add from gallery'),
-              ),
-              if (!kIsWeb)
-                OutlinedButton.icon(
-                  onPressed: _uploading > 0 ? null : () => _add(camera: true),
-                  icon: const Icon(Icons.photo_camera_outlined),
-                  label: const Text('Take a photo'),
-                ),
-            ]),
-            if (_uploading > 0) ...[
-              Gap.md,
-              Row(children: [
-                const SizedBox.square(dimension: 18, child: CircularProgressIndicator(strokeWidth: 2.5)),
-                Gap.sm,
-                Text('Preparing and uploading $_uploading photo${_uploading == 1 ? '' : 's'}…', style: context.text.bodyMedium),
-              ]),
-            ],
-            Gap.lg,
-            Text(
-              needed > 0
-                  ? '${_photos.length} added · add $needed more'
-                  : '${_photos.length} photo${_photos.length == 1 ? '' : 's'} · up to $_maxPhotos',
-              style: context.text.titleSmall,
-            ),
-            Gap.sm,
-            if (_photos.isEmpty)
-              Container(
-                height: 120,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  border: Border.all(color: context.colors.outlineVariant),
-                  borderRadius: BorderRadius.circular(Radii.md),
-                ),
-                child: Text('No photos yet', style: context.text.bodyMedium),
-              )
-            else
-              ReorderableListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                buildDefaultDragHandles: false,
-                itemCount: _photos.length,
-                onReorderItem: _reorder,
-                itemBuilder: (context, i) {
-                  final photo = _photos[i];
-                  return Padding(
-                    key: ValueKey(photo.id ?? photo.storagePath),
-                    padding: const EdgeInsets.only(bottom: Space.sm),
-                    child: Card(
-                      clipBehavior: Clip.antiAlias,
-                      child: Row(children: [
-                        SizedBox(width: 120, height: 84, child: PropertyPhoto(image: photo, thumbnail: true)),
-                        Gap.md,
-                        Expanded(
-                          child: Text(i == 0 ? 'Cover photo' : 'Photo ${i + 1}',
-                              style: i == 0 ? context.text.titleSmall : context.text.bodyMedium),
-                        ),
-                        IconButton(
-                          tooltip: 'Remove photo',
-                          icon: const Icon(Icons.delete_outline_rounded),
-                          onPressed: _uploading > 0 ? null : () => _delete(photo),
-                        ),
-                        ReorderableDragStartListener(
-                          index: i,
-                          child: const Padding(
-                            padding: EdgeInsets.all(Space.md),
-                            child: Icon(Icons.drag_indicator_rounded, semanticLabel: 'Drag to reorder'),
-                          ),
-                        ),
-                      ]),
+          header: header,
+          buildDefaultDragHandles: false,
+          itemCount: _photos.length,
+          onReorderItem: _uploading > 0 ? (_, _) {} : _reorder,
+          itemBuilder: (context, i) {
+            final photo = _photos[i];
+            return ReorderableDelayedDragStartListener(
+              key: ValueKey(photo.id ?? photo.storagePath),
+              index: i,
+              enabled: _uploading == 0,
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: Space.sm),
+                child: Card(
+                  clipBehavior: Clip.antiAlias,
+                  child: Row(children: [
+                    SizedBox(width: 120, height: 84, child: PropertyPhoto(image: photo, thumbnail: true)),
+                    Gap.md,
+                    Expanded(
+                      child: Text(i == 0 ? 'Cover photo' : 'Photo ${i + 1}',
+                          style: i == 0 ? context.text.titleSmall : context.text.bodyMedium),
                     ),
-                  );
-                },
+                    PopupMenuButton<String>(
+                      tooltip: 'Photo options',
+                      enabled: _uploading == 0,
+                      onSelected: (action) => action == 'cover' ? _makeCover(i) : _delete(photo),
+                      itemBuilder: (_) => [
+                        if (i > 0) const PopupMenuItem(value: 'cover', child: Text('Make cover photo')),
+                        const PopupMenuItem(value: 'remove', child: Text('Remove photo')),
+                      ],
+                    ),
+                    ReorderableDragStartListener(
+                      index: i,
+                      enabled: _uploading == 0,
+                      child: const Padding(
+                        padding: EdgeInsets.all(Space.md),
+                        child: Icon(Icons.drag_indicator_rounded, semanticLabel: 'Drag to reorder'),
+                      ),
+                    ),
+                  ]),
+                ),
               ),
-          ],
+            );
+          },
         ),
       ),
       Material(

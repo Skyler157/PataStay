@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:patastay_core/patastay_core.dart';
 
+import '../../../core/widgets/area_picker.dart';
 import '../application/property_providers.dart';
 
 Future<void> showFiltersSheet(BuildContext context) {
@@ -66,13 +67,28 @@ class _FiltersSheetState extends ConsumerState<_FiltersSheet> {
               _Group(
                 title: 'Neighbourhood',
                 child: Wrap(spacing: Space.sm, runSpacing: Space.sm, children: [
-                  for (final n in neighbourhoods)
-                    FilterChip(
+                  for (final n in neighbourhoods.where((n) => _draft.neighbourhoodIds.contains(n.id)))
+                    InputChip(
                       label: Text(n.name),
-                      selected: _draft.neighbourhoodIds.contains(n.id),
-                      onSelected: (_) => setState(
+                      selected: true,
+                      onDeleted: () => setState(
                           () => _draft = _draft.copyWith(neighbourhoodIds: _toggle(_draft.neighbourhoodIds, n.id))),
                     ),
+                  ActionChip(
+                    avatar: const Icon(Icons.search_rounded, size: 18),
+                    label: Text(_draft.neighbourhoodIds.isEmpty ? 'Choose areas' : 'Change areas'),
+                    onPressed: () async {
+                      final chosen = await showAreaPicker(
+                        context,
+                        areas: neighbourhoods,
+                        selected: _draft.neighbourhoodIds,
+                        multiple: true,
+                      );
+                      if (chosen != null && mounted) {
+                        setState(() => _draft = _draft.copyWith(neighbourhoodIds: chosen));
+                      }
+                    },
+                  ),
                 ]),
               ),
               _Group(

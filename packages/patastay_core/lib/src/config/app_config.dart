@@ -55,9 +55,11 @@ class AppConfig {
 
   static const propertyImagesBucket = 'property-images';
 
-  /// Deep link used by Supabase Auth emails (password reset, confirmation).
-  /// Must also be listed under Auth > URL Configuration > Redirect URLs.
-  static const authRedirectUrl = 'com.patastay.app://login-callback';
+  /// Where Supabase Auth email links (confirmation, password reset) land: a
+  /// web page that opens the app via com.patastay.app://login-callback on a
+  /// phone, and explains what to do on a computer. Both must be listed under
+  /// Auth > URL Configuration > Redirect URLs.
+  static const authRedirectUrl = 'https://patastay.netlify.app/auth/callback/';
 
   bool get isProduction => environment == AppEnvironment.production;
 

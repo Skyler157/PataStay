@@ -26,7 +26,6 @@ enum AccountStatus {
 @JsonEnum(valueField: 'dbValue')
 enum PropertyType {
   studio('studio', 'Studio'),
-  bedsitter('bedsitter', 'Bedsitter'),
   oneBedroom('one_bedroom', '1-bedroom'),
   twoBedroom('two_bedroom', '2-bedroom'),
   threeBedroomPlus('three_bedroom_plus', '3-bedroom'),

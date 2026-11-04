@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Open PataStay</title>
+  <meta name="robots" content="noindex">
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <link rel="stylesheet" href="/legal.css">
+  <style>
+    main { text-align: center; max-width: 480px; }
+    .button {
+      display: inline-block;
+      background: var(--brand);
+      color: #fff;
+      padding: 14px 28px;
+      border-radius: 10px;
+      font-weight: 700;
+      text-decoration: none;
+      margin: 16px 0 8px;
+    }
+    @media (prefers-color-scheme: dark) { .button { color: #0b1d1e; } }
+    [hidden] { display: none !important; }
+  </style>
+</head>
+<body>
+<header><div class="bar"><span class="brand">PataStay</span></div></header>
+
+<main>
+  <!-- Email links from Supabase Auth land here, then hand over to the app. -->
+  <section id="phone" hidden>
+    <h1>Continue in the app</h1>
+    <p>Tap the button to open PataStay and finish.</p>
+    <a class="button" id="open" href="#">Open PataStay</a>
+    <p class="meta">Don't have the app on this phone? Open the email on the phone where PataStay is installed.</p>
+  </section>
+
+  <section id="computer" hidden>
+    <h1>Open this link on your phone</h1>
+    <p><strong>Confirming your email?</strong> You're done. Your email address is confirmed, so you can now sign in on the PataStay app.</p>
+    <p><strong>Resetting your password?</strong> Open the reset email on the phone where PataStay is installed, and tap the link there.</p>
+  </section>
+
+  <section id="problem" hidden>
+    <h1>This link didn't work</h1>
+    <p id="reason">The link may have expired or already been used.</p>
+    <p>Open PataStay and try again: sign in to get a new confirmation email, or use "Forgot password?" for a new reset link.</p>
+  </section>
+</main>
+
+<script>
+  (function () {
+    var query = new URLSearchParams(location.search);
+    var hash = new URLSearchParams(location.hash.replace(/^#/, ''));
+    var error = query.get('error_description') || hash.get('error_description');
+    if (error) {
+      document.getElementById('reason').textContent = error.replace(/\+/g, ' ') + '.';
+      document.getElementById('problem').hidden = false;
+      return;
+    }
+
+    // Same query and fragment as Supabase sent, so the app can finish signing in.
+    var appLink = 'com.patastay.app://login-callback' + location.search + location.hash;
+    var android = /Android/i.test(navigator.userAgent);
+    var mobile = android || /iPhone|iPad|iPod/i.test(navigator.userAgent);
+    if (!mobile) {
+      document.getElementById('computer').hidden = false;
+      return;
+    }
+
+    var open = document.getElementById('open');
+    open.href = android
+      // Android intent links can't carry a #fragment; the app's sign-in
+      // links use ?code=..., which is in the query.
+      ? 'intent://login-callback' + location.search +
+        '#Intent;scheme=com.patastay.app;package=com.patastay.app;end'
+      : appLink;
+    document.getElementById('phone').hidden = false;
+    // Try straight away; some browsers only allow it after the tap.
+    location.href = open.href;
+  })();
+</script>
+</body>
+</html>
