@@ -8,12 +8,13 @@ final adminPreferencesProvider = Provider<SharedPreferences?>((ref) => null);
 
 const _themeModeKey = 'admin_theme_mode';
 
-/// Light, dark, or follow the computer. Saved in this browser.
+/// Light, dark, or follow the computer. Saved in this browser; dark until
+/// the admin chooses.
 class AdminThemeModeController extends Notifier<ThemeMode> {
   @override
   ThemeMode build() {
     final saved = ref.watch(adminPreferencesProvider)?.getString(_themeModeKey);
-    return ThemeMode.values.firstWhere((m) => m.name == saved, orElse: () => ThemeMode.system);
+    return ThemeMode.values.firstWhere((m) => m.name == saved, orElse: () => ThemeMode.dark);
   }
 
   Future<void> set(ThemeMode mode) async {

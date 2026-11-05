@@ -8,7 +8,7 @@ abstract interface class LocalPreferences {
   bool get onboardingSeen;
   Future<void> setOnboardingSeen();
 
-  /// 'system', 'light' or 'dark'.
+  /// 'system', 'light' or 'dark'. Dark until the user chooses.
   String get themeMode;
   Future<void> setThemeMode(String mode);
 
@@ -34,7 +34,7 @@ class SharedLocalPreferences implements LocalPreferences {
   Future<void> setOnboardingSeen() => _prefs.setBool(_onboardingSeen, true);
 
   @override
-  String get themeMode => _prefs.getString(_themeMode) ?? 'system';
+  String get themeMode => _prefs.getString(_themeMode) ?? 'dark';
 
   @override
   Future<void> setThemeMode(String mode) => _prefs.setString(_themeMode, mode);
@@ -65,12 +65,13 @@ class OnboardingController extends Notifier<bool> {
 
 final onboardingCompleteProvider = NotifierProvider<OnboardingController, bool>(OnboardingController.new);
 
-/// Light, dark, or follow the phone. Saved on the device.
+/// Light, dark, or follow the phone. Saved on the device; dark until the
+/// user chooses.
 class ThemeModeController extends Notifier<ThemeMode> {
   @override
   ThemeMode build() => ThemeMode.values.firstWhere(
         (m) => m.name == ref.watch(localPreferencesProvider).themeMode,
-        orElse: () => ThemeMode.system,
+        orElse: () => ThemeMode.dark,
       );
 
   Future<void> set(ThemeMode mode) async {

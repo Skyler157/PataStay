@@ -1,11 +1,12 @@
 flutter_native_splash:
-  color: "#F7F4EF"
+  # Always dark: the app starts in dark mode until the user picks a theme.
+  color: "#111318"
   image: assets/branding/splash_logo.png
   color_dark: "#111318"
   image_dark: assets/branding/splash_logo.png
   android_12:
-    color: "#F7F4EF"
-    icon_background_color: "#F7F4EF"
+    color: "#111318"
+    icon_background_color: "#111318"
     image: assets/branding/splash_logo.png
     color_dark: "#111318"
     icon_background_color_dark: "#111318"

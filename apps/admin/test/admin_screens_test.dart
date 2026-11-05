@@ -293,20 +293,20 @@ void main() {
     expect(repo.saved.single['is_active'], isTrue);
   });
 
-  testWidgets('the appearance menu switches to dark mode and remembers it', (tester) async {
+  testWidgets('the dashboard starts dark and remembers a switch to light', (tester) async {
     SharedPreferences.setMockInitialValues({});
     final preferences = await SharedPreferences.getInstance();
     await _pumpAt(tester, FakeAdminRepository(listing: _listing()), '/', preferences: preferences);
     Brightness brightness() => Theme.of(tester.element(find.text('Overview').first)).brightness;
-    expect(brightness(), Brightness.light);
+    expect(brightness(), Brightness.dark);
 
     await tester.tap(find.byTooltip('Appearance'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Dark'));
+    await tester.tap(find.text('Light'));
     await tester.pumpAndSettle();
 
-    expect(brightness(), Brightness.dark);
-    expect(preferences.getString('admin_theme_mode'), 'dark');
+    expect(brightness(), Brightness.light);
+    expect(preferences.getString('admin_theme_mode'), 'light');
   });
 
   test('verification needs identity, authority and a visit or video', () {
